@@ -332,7 +332,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panSpeed: 10
-  controlWithMouse: 0
+  controlWithMouse: 1
   cam: {fileID: 519420031}
   player: {fileID: 1961952968}
 --- !u!1 &637043220
