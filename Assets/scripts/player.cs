@@ -5,15 +5,11 @@ public class Player : MonoBehaviour
     [SerializeField]
     public stats stats;
     public float speed;
-    public CharacterClass characterClass; 
     
 
     void Start()
     {
         speed = stats.speed;
-        characterClass = new Psychic();
-        
-        Debug.Log(characterClass.getName());
     }
 
 
@@ -24,12 +20,12 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.W))
         {
-            pos.z += speed * Time.deltaTime;
+            pos.y += speed * Time.deltaTime;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            pos.z -= speed * Time.deltaTime;
+            pos.y -= speed * Time.deltaTime;
         }
 
         if (Input.GetKey(KeyCode.D))

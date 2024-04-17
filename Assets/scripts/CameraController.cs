@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
         //Center the camera to player on update
         if (Input.mousePosition.y <= Screen.height - panBorderThickness && Input.mousePosition.y >= panBorderThickness && Input.mousePosition.x >= panBorderThickness && Input.mousePosition.x <= Screen.width - panBorderThickness)
         {
-            pos = player.transform.position + new Vector3(0, 10, 0);
+            pos = player.transform.position + new Vector3(0, 0, -10);
         }
 
         //Control the camera when mouse is off screen
@@ -32,11 +32,11 @@ public class CameraController : MonoBehaviour
 
             if (Input.mousePosition.y >= Screen.height - panBorderThickness)
             {
-                pos.z += panSpeed * Time.deltaTime;
+                pos.y += panSpeed * Time.deltaTime;
             }
             if (Input.mousePosition.y <= panBorderThickness)
             {
-                pos.z -= panSpeed * Time.deltaTime;
+                pos.y -= panSpeed * Time.deltaTime;
             }
             if (Input.mousePosition.x <= panBorderThickness)
             {
