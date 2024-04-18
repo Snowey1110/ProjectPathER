@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 999a7af9a21f12642b1ea790fb70c2e4
+guid: 3db32d78d4e1892458c48b58ba676d1a
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -34,7 +34,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -48,7 +48,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -69,7 +69,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 8192
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -110,13 +110,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Archer Idle_0
+      name: elf_archer-Sheet-sheet_0
       rect:
         serializedVersion: 2
-        x: 208
-        y: 148
-        width: 235
-        height: 345
+        x: 0
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -124,20 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a5cedd79b755302428d6f6f77ff2bf73
-      internalID: -296510308
+      spriteID: 13e3b3306d49859498a7ae7fadfeafed
+      internalID: -1097854924
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_1
+      name: elf_archer-Sheet-sheet_1
       rect:
         serializedVersion: 2
-        x: 848
-        y: 148
-        width: 235
-        height: 345
+        x: 640
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -145,20 +145,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 85211010817880d4fb61770b878e81bd
-      internalID: -407739861
+      spriteID: abdbf683ccf5cc34db0a7f1d3082dbc8
+      internalID: -1030183460
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_2
+      name: elf_archer-Sheet-sheet_2
       rect:
         serializedVersion: 2
-        x: 1488
-        y: 148
-        width: 235
-        height: 345
+        x: 1280
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,20 +166,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e61c662ab8468d04aa001482962bdda9
-      internalID: -386173474
+      spriteID: cdf8d318057d07b459e9b81f590162d1
+      internalID: -949118704
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_3
+      name: elf_archer-Sheet-sheet_3
       rect:
         serializedVersion: 2
-        x: 2118
-        y: 148
-        width: 245
-        height: 335
+        x: 1920
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -187,20 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 330f07815bbb3af438cba0d65e478ca2
-      internalID: 960930048
+      spriteID: b0db2bacec9b3c144a73a9fe5a98bf79
+      internalID: -769952784
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_4
+      name: elf_archer-Sheet-sheet_4
       rect:
         serializedVersion: 2
-        x: 2768
-        y: 148
-        width: 235
-        height: 335
+        x: 2560
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -208,20 +208,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1f41781423db007478585c99ba768049
-      internalID: 1856817887
+      spriteID: 3fe279951fcda8045b52b065960a8ee3
+      internalID: 925678198
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_5
+      name: elf_archer-Sheet-sheet_5
       rect:
         serializedVersion: 2
-        x: 3408
-        y: 148
-        width: 235
-        height: 335
+        x: 3200
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -229,20 +229,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 75019fa29ad9195449dbac8788e0e3d2
-      internalID: -383374850
+      spriteID: 0d7139814f1d3d7469cf62a210c7b6a4
+      internalID: -1170238309
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_6
+      name: elf_archer-Sheet-sheet_6
       rect:
         serializedVersion: 2
-        x: 4058
-        y: 148
-        width: 225
-        height: 335
+        x: 3840
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -250,20 +250,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1924e06cc8cae3f46b1c3e45cb8bcc2d
-      internalID: -1069159405
+      spriteID: 2d1bb5d1fd6e25341994e18a9d28b03e
+      internalID: -730687047
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Archer Idle_7
+      name: elf_archer-Sheet-sheet_7
       rect:
         serializedVersion: 2
-        x: 4698
-        y: 148
-        width: 225
-        height: 345
+        x: 4480
+        y: 0
+        width: 640
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -271,8 +271,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3975bb28575c5654c941801f679ab173
-      internalID: -921187272
+      spriteID: b8fc99ca99615d643b8ad03fd476a768
+      internalID: 1195937028
       vertices: []
       indices: 
       edges: []
@@ -288,14 +288,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Archer Idle_0: -296510308
-      Archer Idle_1: -407739861
-      Archer Idle_2: -386173474
-      Archer Idle_3: 960930048
-      Archer Idle_4: 1856817887
-      Archer Idle_5: -383374850
-      Archer Idle_6: -1069159405
-      Archer Idle_7: -921187272
+      elf_archer-Sheet-sheet_0: -1097854924
+      elf_archer-Sheet-sheet_1: -1030183460
+      elf_archer-Sheet-sheet_2: -949118704
+      elf_archer-Sheet-sheet_3: -769952784
+      elf_archer-Sheet-sheet_4: 925678198
+      elf_archer-Sheet-sheet_5: -1170238309
+      elf_archer-Sheet-sheet_6: -730687047
+      elf_archer-Sheet-sheet_7: 1195937028
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
