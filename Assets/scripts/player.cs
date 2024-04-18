@@ -5,6 +5,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     public stats stats;
     public float speed;
+    public Animator animator;
     
 
     void Start()
@@ -21,6 +22,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             pos.y += speed * Time.deltaTime;
+            //animator.SetBool("run", true);
         }
 
         if (Input.GetKey(KeyCode.S))
