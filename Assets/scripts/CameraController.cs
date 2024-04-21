@@ -18,6 +18,9 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+        if (player == null)
+            return;
+
         Vector3 pos = transform.position;
 
         //Center the camera to player on update
@@ -47,7 +50,7 @@ public class CameraController : MonoBehaviour
                 pos.x += panSpeed * Time.deltaTime;
             }
         }
-        
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("Resetting camera");
@@ -59,5 +62,7 @@ public class CameraController : MonoBehaviour
         cam.orthographicSize = Mathf.Clamp(newZoom, minZoom, maxZoom);
 
         transform.position = pos;
+        
     }
+        
 }

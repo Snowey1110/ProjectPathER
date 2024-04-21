@@ -32,11 +32,13 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.D))
         {
+            GetComponent<SpriteRenderer>().flipX = false;
             pos.x += speed * Time.deltaTime;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
+            GetComponent<SpriteRenderer>().flipX = true;
             pos.x -= speed * Time.deltaTime;
         }
 
@@ -45,9 +47,6 @@ public class Player : MonoBehaviour
         
         
     }
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        Destroy(collision);
-    }
+
 
 }
