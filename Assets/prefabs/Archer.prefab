@@ -101,7 +101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 5534538148860239083}
   speed: 1
-  animator: {fileID: 0}
+  animator: {fileID: 5161156361555879160}
 --- !u!114 &5534538148860239083
 MonoBehaviour:
   m_ObjectHideFlags: 0
