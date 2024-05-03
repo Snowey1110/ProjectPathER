@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        speed = stats.speed;
+
     }
 
 

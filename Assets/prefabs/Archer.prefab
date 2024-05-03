@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3068659195765762958}
   - component: {fileID: 4819006595764804383}
   - component: {fileID: 7806251819041202292}
+  - component: {fileID: -6463144944851848017}
   m_Layer: 3
   m_Name: Archer
   m_TagString: Player
@@ -103,7 +104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 5534538148860239083}
-  speed: 1
+  speed: 4
   animator: {fileID: 5161156361555879160}
 --- !u!114 &5534538148860239083
 MonoBehaviour:
@@ -121,7 +122,6 @@ MonoBehaviour:
   defense: 1
   mana: 10
   baseDamage: 1
-  speed: 2
   level: 0
 --- !u!95 &5161156361555879160
 Animator:
@@ -223,3 +223,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 4.06, y: 5.81}
   m_Direction: 0
+--- !u!114 &-6463144944851848017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616637710575777061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8bb7b815ce73b044b48dcc7ec0c697c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  dash: 5
+  dashDistance: 5
+  dashDuration: 0.5
+  cooldown: 3

@@ -7,7 +7,6 @@ public class stats : MonoBehaviour
     public int defense = 1;
     public int mana = 10;
     public int baseDamage = 1;
-    public float speed = 2;
     public int level = 0;
 
     // Checking if the unit should be dead
