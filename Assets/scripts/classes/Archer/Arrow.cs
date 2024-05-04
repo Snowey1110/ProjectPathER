@@ -27,11 +27,21 @@ public class Arrow : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        Destroy(transform.gameObject); // killing itself after hit
 
         hasHit = true;
-        GetComponent<Rigidbody2D>().velocity = Vector2.zero; // Stop moving after hit
+        //GetComponent<Rigidbody2D>().velocity = Vector2.zero; // Stop moving after hit
         GetComponent<Rigidbody2D>().isKinematic = true; // Stop physics after hit
-        Destroy(collision.gameObject);
-        Destroy(transform.gameObject);
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            stats enemyHealth = collision.gameObject.GetComponent<stats>();
+            enemyHealth.takeDamage(1);
+        }
+        else
+        {
+            Destroy(collision.gameObject);
+        }
+             
+        
     }
 }

@@ -8,11 +8,8 @@ public class ArcherAbilities : MonoBehaviour
     public Animator animator;
 
     //Dash
-    public int dash = 5;
-    public float dashDistance = 30f; // Distance to dash
-    public float dashDuration = 0.5f; // Duration of the dash
-    public float cooldown = 1f; // Cooldown of the ability
-    private bool isOnCooldown = false;
+    public int dashLvl = 5;
+    private bool dashCD = false;
 
 
     void Start()
@@ -23,13 +20,32 @@ public class ArcherAbilities : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q) && !isOnCooldown)
+        if (Input.GetKeyDown(KeyCode.Q) && !dashCD)
         {
-            Dash();
-        }
+            if (dashLvl == 0){
+                Debug.Log("Ability hasn't unlocked");
+            } else if (dashLvl == 1)
+            {
+                Dash(10, 30, 0.15f);
+            } else if (dashLvl == 2)
+            {
+                Dash(5, 30, 0.15f);
+            } else if (dashLvl == 3)
+            {
+                Dash(3, 35, 0.15f);
+            } else if (dashLvl == 4)
+            {
+                Dash(1.5f, 40, 0.15f);
+            } else if (dashLvl >= 5)
+            {
+                Dash(1, 40, 0.15f);
+            }
+
+
+    }
     }
 
-    void Dash()
+    void Dash(float cooldown, float dashDistance, float dashTime)
     {
         // Check if there's a direction to dash towards
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -37,16 +53,16 @@ public class ArcherAbilities : MonoBehaviour
         if (dashDirection != Vector2.zero)
         {
             // Disable ability during cooldown
-            isOnCooldown = true;
+            dashCD = true;
             Invoke("ResetCooldown", cooldown);
 
 
             // Perform dash
-            StartCoroutine(PerformDash(dashDirection));
+            StartCoroutine(PerformDash(dashDirection, dashDistance, dashTime));
         }
     }
 
-    IEnumerator PerformDash(Vector2 direction)
+    IEnumerator PerformDash(Vector2 direction, float dashDistance, float dashDuration)
     {
         float elapsedTime = 0;
 
@@ -62,6 +78,6 @@ public class ArcherAbilities : MonoBehaviour
     }
     void ResetCooldown()
     {
-        isOnCooldown = false;
+        dashCD = false;
     }
 }
