@@ -7,8 +7,9 @@ public class stats : MonoBehaviour
     public int currentHealth;
     public int defense = 1;
     public int mana = 10;
-    public int baseDamage = 1;
+    public int baseDamage = 2;
     public int level = 0;
+    public int abilityPoints = 0;
     public HealthBar healthBar;
 
     // Checking if the unit should be dead
@@ -19,10 +20,7 @@ public class stats : MonoBehaviour
     }
     private void Update()
     {
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        
         if (Input.GetKeyDown(KeyCode.Space))
         {
             currentHealth -= 1;
@@ -34,6 +32,10 @@ public class stats : MonoBehaviour
     {
         currentHealth = currentHealth - damageReceived;
         healthBar.SetHealth(currentHealth);
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 
     private void Die()

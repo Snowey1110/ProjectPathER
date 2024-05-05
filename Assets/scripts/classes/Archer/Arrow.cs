@@ -35,7 +35,9 @@ public class Arrow : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy"))
         {
             stats enemyHealth = collision.gameObject.GetComponent<stats>();
-            enemyHealth.takeDamage(1);
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            stats playerStats = player.GetComponent<stats>();
+            enemyHealth.takeDamage(playerStats.baseDamage);
         }
         else
         {
