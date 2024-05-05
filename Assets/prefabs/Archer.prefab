@@ -391,36 +391,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slider: {fileID: 671124154332307123}
-  gradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 1}
-    key1: {r: 1, g: 1, b: 1, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 65535
-    ctime2: 0
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 2
-    m_NumAlphaKeys: 2
   fill: {fileID: 2312611064809136032}
 --- !u!1 &8616637710575777061
 GameObject:
@@ -434,11 +404,11 @@ GameObject:
   - component: {fileID: 7442509775723964772}
   - component: {fileID: 993466185380105959}
   - component: {fileID: 5534538148860239083}
-  - component: {fileID: 5161156361555879160}
   - component: {fileID: 3068659195765762958}
+  - component: {fileID: -6463144944851848017}
+  - component: {fileID: 5161156361555879160}
   - component: {fileID: 4819006595764804383}
   - component: {fileID: 7806251819041202292}
-  - component: {fileID: -6463144944851848017}
   m_Layer: 3
   m_Name: Archer
   m_TagString: Player
@@ -541,13 +511,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 343bbcf5dcc0d64438d0fefe94efee88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healthBar: {fileID: 2490360024933785847}
+  player: {fileID: 0}
   HP: 10
   currentHealth: 0
   defense: 1
   mana: 10
   baseDamage: 1
   level: 0
-  healthBar: {fileID: 2490360024933785847}
+  abilityPoints: 11
+  allowCombat: 1
+--- !u!114 &3068659195765762958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616637710575777061}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a3878568042a4840b46e10eae5dd7ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-6463144944851848017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616637710575777061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8bb7b815ce73b044b48dcc7ec0c697c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  dashLvl: 5
+  arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
+  chargingSpeed: 10
+  maxCharge: 100
+  shootForce: 10
+  aimIndicator: {fileID: 2577825563109100944, guid: f15599680e71a224989e18a68e6b596a, type: 3}
 --- !u!95 &5161156361555879160
 Animator:
   serializedVersion: 5
@@ -569,23 +573,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &3068659195765762958
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8616637710575777061}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a3878568042a4840b46e10eae5dd7ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
-  chargingSpeed: 10
-  maxCharge: 100
-  shootForce: 10
-  aimIndicator: {fileID: 2577825563109100944, guid: f15599680e71a224989e18a68e6b596a, type: 3}
 --- !u!50 &4819006595764804383
 Rigidbody2D:
   serializedVersion: 4
@@ -648,17 +635,3 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 4.06, y: 5.81}
   m_Direction: 0
---- !u!114 &-6463144944851848017
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8616637710575777061}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8bb7b815ce73b044b48dcc7ec0c697c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 0}
-  dashLvl: 5

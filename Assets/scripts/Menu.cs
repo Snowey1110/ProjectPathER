@@ -40,7 +40,7 @@ public class MenuToggle : MonoBehaviour
                 Menu.SetActive(true);
                 if (GameObject.FindWithTag("Player") != null)
                 {
-                    GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = true;
+                    GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
                 }
             }
         }

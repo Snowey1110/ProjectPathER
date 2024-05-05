@@ -5,11 +5,23 @@ using UnityEngine;
 public class ArcherAbilities : MonoBehaviour
 {
     // Start is called before the first frame update
+
     public Animator animator;
 
     //Dash
     public int dashLvl = 5;
     private bool dashCD = false;
+
+
+    //Shoot
+    public GameObject arrowPrefab;
+    public float chargingSpeed = 10f; //incremental multiplier
+    public float maxCharge = 10f; //max multiplier
+    public float shootForce = 10; //increased base shoot force
+    private float currentCharge = 1f;
+    private Vector3 shootDir;
+    private bool isCharging = false;
+    public GameObject aimIndicator;
 
 
     void Start()
@@ -20,6 +32,41 @@ public class ArcherAbilities : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        //Shoot
+        if (Input.GetMouseButtonDown(0) && GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat)
+        {
+            isCharging = true;
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePos.z = 0;
+
+            aimIndicator.transform.position = mousePos;
+            aimIndicator.SetActive(true);
+        }
+
+        if (isCharging)
+        {
+            currentCharge += chargingSpeed * Time.deltaTime;
+            if (currentCharge > maxCharge)
+            {
+                currentCharge = maxCharge;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0) && isCharging)
+        {
+            isCharging = false;
+            aimIndicator.SetActive(false);
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePos.z = 0;
+            shootDir = (mousePos - transform.position).normalized;
+            GameObject arrow = Instantiate(arrowPrefab, transform.position, Quaternion.identity) as GameObject;
+            Rigidbody2D rb2d = arrow.GetComponent<Rigidbody2D>();
+            rb2d.AddForce(shootDir * shootForce * currentCharge);
+            currentCharge = 1f; //reset the current charge after firing
+        }
+
+        //Dash
         if (Input.GetKeyDown(KeyCode.Q) && !dashCD)
         {
             if (dashLvl == 0){

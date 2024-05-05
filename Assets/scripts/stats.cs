@@ -8,14 +8,14 @@ public class stats : MonoBehaviour
     public Player player;
 
 
-    public int HP = 10;
+    public int HP;
     public int currentHealth;
-    public int defense = 1;
-    public int mana = 10;
-    public int baseDamage = 2;
-    public int level = 0;
-    public int abilityPoints = 0;
-
+    public int defense;
+    public int mana;
+    public int baseDamage;
+    public int level;
+    public int abilityPoints;
+    public int totalAbilityPoints;
 
 
 
@@ -24,9 +24,10 @@ public class stats : MonoBehaviour
     // Checking if the unit should be dead
     private void Start()
     {
+        
         currentHealth = HP;
-        healthBar.SetMaxHealth(HP);
-
+        healthBar.SetMaxHealth(HP, currentHealth);
+        totalAbilityPoints = abilityPoints;
         //GameObject player = GameObject.FindWithTag("Player");
         //float speed = player.GetComponent<Player>().speed;
 
@@ -38,7 +39,7 @@ public class stats : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            currentHealth -= 1;
+            takeDamage(1);
             healthBar.SetHealth(currentHealth);
         }
     }
@@ -59,6 +60,7 @@ public class stats : MonoBehaviour
         Debug.Log("Unit died.");
 
     }
+
 
 
 
