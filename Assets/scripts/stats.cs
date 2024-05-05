@@ -1,8 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 public class stats : MonoBehaviour
 {
+    public HealthBar healthBar;
+    public Player player;
+
+
     public int HP = 10;
     public int currentHealth;
     public int defense = 1;
@@ -10,13 +15,23 @@ public class stats : MonoBehaviour
     public int baseDamage = 2;
     public int level = 0;
     public int abilityPoints = 0;
-    public HealthBar healthBar;
+
+
+
+
+    public bool allowCombat = true;
 
     // Checking if the unit should be dead
     private void Start()
     {
         currentHealth = HP;
         healthBar.SetMaxHealth(HP);
+
+        //GameObject player = GameObject.FindWithTag("Player");
+        //float speed = player.GetComponent<Player>().speed;
+
+
+
     }
     private void Update()
     {
@@ -44,6 +59,8 @@ public class stats : MonoBehaviour
         Debug.Log("Unit died.");
 
     }
+
+
 
 
 }

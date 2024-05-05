@@ -17,6 +17,8 @@ public class ClassSelect : MonoBehaviour
         GameObject newArcher = Instantiate(Archer, new Vector3(0, 0, 0), Quaternion.identity);
         MainCamera.GetComponent<CameraController>().player = newArcher;
         Destroy(gameObject);
+
+
     }
 
 

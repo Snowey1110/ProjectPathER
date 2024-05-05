@@ -1473,7 +1473,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settingMenu: {fileID: 713796119}
+  Menu: {fileID: 713796119}
+  smb: {fileID: 983954808}
 --- !u!1 &745154183
 GameObject:
   m_ObjectHideFlags: 0
@@ -1744,8 +1745,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 713796122}
-        m_TargetAssemblyTypeName: settingMenuScript, Assembly-CSharp
-        m_MethodName: toggleSoundController
+        m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
+        m_MethodName: toggleMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2871,8 +2872,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 713796122}
-        m_TargetAssemblyTypeName: settingMenuScript, Assembly-CSharp
-        m_MethodName: toggleSoundController
+        m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
+        m_MethodName: toggleMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
