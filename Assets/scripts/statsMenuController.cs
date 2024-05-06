@@ -43,7 +43,7 @@ public class statsMenuController : MonoBehaviour
         var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
         var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
 
-        if (playerStats == null)
+        if ((playerStats == null) || (playerMovements ==null))
         {
             Debug.LogError("Cannot find the Player's stats component");
             return;

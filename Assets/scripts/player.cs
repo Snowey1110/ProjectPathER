@@ -16,41 +16,43 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-
-        Vector3 pos = transform.position;
+        Vector3 moveDir = Vector3.zero;
         bool isWalking = false;
 
         if (Input.GetKey(KeyCode.W))
         {
-            pos.y += speed * Time.deltaTime;
+            moveDir.y += 1;
             isWalking = true;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            pos.y -= speed * Time.deltaTime;
+            moveDir.y -= 1;
             isWalking = true;
         }
 
         if (Input.GetKey(KeyCode.D))
         {
             GetComponent<SpriteRenderer>().flipX = false;
-            pos.x += speed * Time.deltaTime;
+            moveDir.x += 1;
             isWalking = true;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
             GetComponent<SpriteRenderer>().flipX = true;
-            pos.x -= speed * Time.deltaTime;
+            moveDir.x -= 1;
             isWalking = true;
         }
 
+        if (isWalking)
+        {
+            // Normalize the move direction vector to account for diagonal movement
+            moveDir.Normalize();
+            transform.position += moveDir * speed * Time.deltaTime;
+        }
+
         animator.SetBool("walking", isWalking);
-        transform.position = pos;
-
-
-
     }
 
 

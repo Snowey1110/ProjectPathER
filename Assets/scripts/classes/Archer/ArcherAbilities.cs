@@ -97,12 +97,22 @@ public class ArcherAbilities : MonoBehaviour
         // Check if there's a direction to dash towards
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 dashDirection = (mousePosition - (Vector2)transform.position).normalized;
+
         if (dashDirection != Vector2.zero)
         {
             // Disable ability during cooldown
             dashCD = true;
             Invoke("ResetCooldown", cooldown);
 
+            // Flip sprite depending on dash direction
+            if (dashDirection.x < 0)
+            {
+                GetComponent<SpriteRenderer>().flipX = true;
+            }
+            else
+            {
+                GetComponent<SpriteRenderer>().flipX = false;
+            }
 
             // Perform dash
             StartCoroutine(PerformDash(dashDirection, dashDistance, dashTime));
@@ -123,6 +133,7 @@ public class ArcherAbilities : MonoBehaviour
             yield return null;
         }
     }
+
     void ResetCooldown()
     {
         dashCD = false;
