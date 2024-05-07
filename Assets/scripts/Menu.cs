@@ -52,11 +52,28 @@ public class MenuToggle : MonoBehaviour
     public void openMenu()
     {
         Menu.SetActive(true);
+        if (GameObject.FindWithTag("Player") != null)
+        {
+            GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
+        }
     }
     public void closeMenu()
     {
         Menu.SetActive(false);
+        if (GameObject.FindWithTag("Player") != null)
+        {
+            GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = true;
+        }
     }
 
+    public void switchToMenu(GameObject InactiveMenu)
+    {
+        Menu.SetActive(false);
+        InactiveMenu.SetActive(true);
+        if (GameObject.FindWithTag("Player") != null)
+        {
+            GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
+        }
+    }
 
 }
