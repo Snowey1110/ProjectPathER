@@ -37,11 +37,13 @@ public class stats : MonoBehaviour
     private void Update()
     {
         
-        if (Input.GetKeyDown(KeyCode.Space))
+        //Test function, hit space to take 1 damage
+        if (Input.GetKeyDown(KeyCode.Backslash))
         {
             takeDamage(1);
             healthBar.SetHealth(currentHealth);
         }
+        
     }
 
     public void takeDamage(int damageReceived)

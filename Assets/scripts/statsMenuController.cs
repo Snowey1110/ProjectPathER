@@ -13,6 +13,13 @@ public class statsMenuController : MonoBehaviour
     public TextMeshProUGUI MPP;
     public TextMeshProUGUI SKILLPOINTS;
 
+    //Bonus stats after leveling
+    private int bonusATK;
+    private int bonusDEF;
+    private int bonusSPD;
+    private int bonusHPP;
+    private int bonusMPP;
+
 
     // Start is called before the first frame update
     private void OnEnable()
@@ -117,20 +124,74 @@ public class statsMenuController : MonoBehaviour
             loadStats();
         }
     }
+
+    //Default archer stats (Modify here to set default stats)
     public void setDefaultArcherStats()
     {
         var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
         var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
         playerStats.totalAbilityPoints = 11;
-        playerStats.baseDamage = 1;
-        playerStats.HP = 10;
+        playerStats.baseDamage = 1 + bonusATK;
+        playerStats.HP = 10 + bonusHPP;
         playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
-        playerStats.mana = 1;
-        playerStats.defense = 1;
-        playerMovements.speed = 4;
+        playerStats.mana = 1 + bonusMPP;
+        playerStats.defense = 1 + bonusDEF;
+        playerMovements.speed = 4 + bonusSPD;
         playerStats.abilityPoints = playerStats.totalAbilityPoints;
         loadStats();
     }
 
-    
+    public void levelUp()
+    {
+        var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
+        if (playerStats == null)
+        {
+            Debug.LogError("Cannot find the Player's stats component");
+            return;
+        }
+
+
+        //Randomly adds stats bonus to the player
+        int randomStat = Random.Range(0, 5);
+
+        switch (randomStat)
+        {
+            case 0:
+                bonusATK += 1;
+                playerStats.baseDamage += 1;
+                break;
+            case 1:
+                bonusDEF += 1;
+                playerStats.defense += 1;
+                break;
+            case 2:
+                bonusSPD += 1;
+                var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
+                if (playerMovements != null)
+                {
+                    playerMovements.speed += 1;
+                }
+                break;
+            case 3:
+                bonusHPP += 1;
+                playerStats.HP += 1;
+                playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
+                break;
+            case 4:
+                bonusMPP += 1;
+                playerStats.mana += 1;
+                break;
+            default:
+                Debug.LogError("Unexpected randomStat: " + randomStat);
+                return;
+        }
+        //Regen player to full HP
+        playerStats.currentHealth = playerStats.HP; 
+        playerStats.healthBar.SetHealth(-1); 
+
+        playerStats.abilityPoints += 5; //Give 5 ability points on leveling
+        playerStats.level += 1; //Levels the player up
+        loadStats();
+    }
+
 }
