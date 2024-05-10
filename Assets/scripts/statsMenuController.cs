@@ -13,12 +13,17 @@ public class statsMenuController : MonoBehaviour
     public TextMeshProUGUI MPP;
     public TextMeshProUGUI SKILLPOINTS;
 
-    //Bonus stats after leveling
-    private int bonusATK;
-    private int bonusDEF;
-    private int bonusSPD;
-    private int bonusHPP;
-    private int bonusMPP;
+    //Temp stats after leveling
+    private int abilityPointSpent;
+    private int tempATK;
+    private int tempDEF;
+    private int tempSPD;
+    private int tempHPP;
+    private int tempMPP;
+
+    //Reset Button
+    public GameObject resetButton;
+    public GameObject confirmButton;
 
 
     // Start is called before the first frame update
@@ -61,19 +66,24 @@ public class statsMenuController : MonoBehaviour
             switch (statType)
             {
                 case "ATK":
+                    tempATK += 1;
                     playerStats.baseDamage += 1;
                     break;
                 case "DEF":
+                    tempDEF += 1;
                     playerStats.defense += 1;
                     break;
                 case "SPD":
+                    tempSPD += 1;
                     playerMovements.speed += 1;
                     break;
                 case "HPP":
+                    tempHPP += 1;
                     playerStats.HP += 1;
                     playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
                     break;
                 case "MPP":
+                    tempMPP += 1;
                     playerStats.mana += 1;
                     break;
                 default:
@@ -81,6 +91,7 @@ public class statsMenuController : MonoBehaviour
                     return;
             }
             playerStats.abilityPoints -= 1;
+            abilityPointSpent += 1;
             loadStats();
         }
     }
@@ -101,43 +112,66 @@ public class statsMenuController : MonoBehaviour
             switch (statType)
             {
                 case "ATK":
+                    tempATK += 10;
                     playerStats.baseDamage += 10;
                     break;
                 case "DEF":
+                    tempDEF += 10;
                     playerStats.defense += 10;
                     break;
                 case "SPD":
+                    tempSPD += 10;
                     playerMovements.speed += 10;
                     break;
                 case "HPP":
+                    tempHPP += 10;
                     playerStats.HP += 10;
                     playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
                     break;
                 case "MPP":
+                    tempMPP += 10;
                     playerStats.mana += 10;
                     break;
                 default:
                     Debug.LogError("Invalid stat type: " + statType);
                     return;
             }
+            abilityPointSpent += 10;
             playerStats.abilityPoints -= 10;
             loadStats();
         }
     }
 
-    //Default archer stats (Modify here to set default stats)
-    public void setDefaultArcherStats()
+    //Reset Ability Points after spending
+    public void resetAbilityPoints()
     {
         var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
         var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
-        playerStats.totalAbilityPoints = 11;
-        playerStats.baseDamage = 1 + bonusATK;
-        playerStats.HP = 10 + bonusHPP;
+        playerStats.abilityPoints += abilityPointSpent;
+        abilityPointSpent = 0;
+        playerStats.baseDamage -= tempATK;
+        tempATK = 0;
+        playerStats.HP -= tempHPP;
+        tempHPP = 0;
         playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
-        playerStats.mana = 1 + bonusMPP;
-        playerStats.defense = 1 + bonusDEF;
-        playerMovements.speed = 4 + bonusSPD;
-        playerStats.abilityPoints = playerStats.totalAbilityPoints;
+        playerStats.mana -= tempMPP;
+        tempMPP = 0;
+        playerStats.defense -= tempDEF;
+        tempDEF = 0;
+        playerMovements.speed -= tempSPD;
+        tempSPD = 0;
+        loadStats();
+    }
+
+    //Confirm ability points spent
+    public void confirmAbilityPointSpent()
+    {
+        tempATK = 0;
+        tempHPP = 0;
+        tempMPP = 0;
+        tempDEF = 0;
+        tempSPD = 0;
+        abilityPointSpent = 0;
         loadStats();
     }
 
@@ -151,21 +185,21 @@ public class statsMenuController : MonoBehaviour
         }
 
 
-        //Randomly adds stats bonus to the player
+        //Randomly adds stats temp to the player
         int randomStat = Random.Range(0, 5);
 
         switch (randomStat)
         {
             case 0:
-                bonusATK += 1;
+                tempATK += 1;
                 playerStats.baseDamage += 1;
                 break;
             case 1:
-                bonusDEF += 1;
+                tempDEF += 1;
                 playerStats.defense += 1;
                 break;
             case 2:
-                bonusSPD += 1;
+                tempSPD += 1;
                 var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
                 if (playerMovements != null)
                 {
@@ -173,12 +207,12 @@ public class statsMenuController : MonoBehaviour
                 }
                 break;
             case 3:
-                bonusHPP += 1;
+                tempHPP += 1;
                 playerStats.HP += 1;
                 playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
                 break;
             case 4:
-                bonusMPP += 1;
+                tempMPP += 1;
                 playerStats.mana += 1;
                 break;
             default:
