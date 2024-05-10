@@ -1327,8 +1327,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1108031288}
-        m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
+      - m_Target: {fileID: 1108031292}
+        m_TargetAssemblyTypeName: LevelMenu, Assembly-CSharp
         m_MethodName: switchToMenu
         m_Mode: 2
         m_Arguments:
@@ -2106,8 +2106,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1226701699}
-        m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
+      - m_Target: {fileID: 1226701701}
+        m_TargetAssemblyTypeName: LevelMenu, Assembly-CSharp
         m_MethodName: toggleMenu
         m_Mode: 1
         m_Arguments:
@@ -2703,8 +2703,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1226701699}
-        m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
+      - m_Target: {fileID: 1226701701}
+        m_TargetAssemblyTypeName: LevelMenu, Assembly-CSharp
         m_MethodName: toggleMenu
         m_Mode: 1
         m_Arguments:
@@ -3864,7 +3864,7 @@ GameObject:
   - component: {fileID: 1108031291}
   - component: {fileID: 1108031290}
   - component: {fileID: 1108031289}
-  - component: {fileID: 1108031288}
+  - component: {fileID: 1108031292}
   m_Layer: 5
   m_Name: SKILLS Menu
   m_TagString: Untagged
@@ -3893,20 +3893,6 @@ RectTransform:
   m_AnchoredPosition: {x: -2, y: -9}
   m_SizeDelta: {x: 550, y: 550}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1108031288
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1108031286}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Menu: {fileID: 1108031286}
-  smb: {fileID: 0}
 --- !u!114 &1108031289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3989,6 +3975,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1108031286}
   m_CullTransparentMesh: 1
+--- !u!114 &1108031292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108031286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a50b4e8e18cae447acc73cacb06f389, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Menu: {fileID: 1108031286}
+  statsMenuController: {fileID: 0}
 --- !u!224 &1166133083 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3166260059837092964, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
@@ -4202,7 +4202,7 @@ GameObject:
   - component: {fileID: 1226701698}
   - component: {fileID: 1226701697}
   - component: {fileID: 1226701696}
-  - component: {fileID: 1226701699}
+  - component: {fileID: 1226701701}
   - component: {fileID: 1226701700}
   m_Layer: 5
   m_Name: LEVEL Menu
@@ -4324,20 +4324,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1226701694}
   m_CullTransparentMesh: 1
---- !u!114 &1226701699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1226701694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Menu: {fileID: 1226701694}
-  smb: {fileID: 0}
 --- !u!114 &1226701700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4357,8 +4343,22 @@ MonoBehaviour:
   HPP: {fileID: 860556787}
   MPP: {fileID: 34241527}
   SKILLPOINTS: {fileID: 902881333}
-  resetButton: {fileID: 0}
-  confirmButton: {fileID: 0}
+  resetButton: {fileID: 1725725350}
+  confirmButton: {fileID: 1540933008}
+--- !u!114 &1226701701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226701694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a50b4e8e18cae447acc73cacb06f389, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Menu: {fileID: 1226701694}
+  statsMenuController: {fileID: 1226701700}
 --- !u!1 &1232615409
 GameObject:
   m_ObjectHideFlags: 0
@@ -5090,7 +5090,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1108031288}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
         m_MethodName: toggleMenu
         m_Mode: 1
@@ -6007,8 +6007,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1226701699}
-        m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
+      - m_Target: {fileID: 1226701701}
+        m_TargetAssemblyTypeName: LevelMenu, Assembly-CSharp
         m_MethodName: switchToMenu
         m_Mode: 2
         m_Arguments:

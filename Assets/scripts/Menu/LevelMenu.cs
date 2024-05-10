@@ -2,28 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MenuToggle : MonoBehaviour
+public class LevelMenu : MenuToggle
 {
-    public GameObject Menu;
-    public GameObject smb; //Sound Menu
-
-    void Start()
-    {
-        /*
-        GameObject smb = GameObject.Find("Sound Menu Background");
-        smb.transform.SetLocalPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
-        */
-        if (smb != null)
-        {
-            smb.transform.SetLocalPositionAndRotation(new Vector3(0, 0, 0), Quaternion.identity);
-        }
-
-
-
-
-
-    }
-    public void toggleMenu()
+    public statsMenuController statsMenuController;
+    public override void toggleMenu()
     {
         if (Menu != null)
         {
@@ -48,25 +30,24 @@ public class MenuToggle : MonoBehaviour
         {
             Debug.LogWarning("Menu GameObject is not assigned!");
         }
+        statsMenuController.confirmAbilityPointSpent();
     }
-    public void openMenu()
+    public override void openMenu()
     {
         Menu.SetActive(true);
-        if (GameObject.FindWithTag("Player") != null)
-        {
-            GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
-        }
+
     }
-    public void closeMenu()
+    public override void closeMenu()
     {
         Menu.SetActive(false);
         if (GameObject.FindWithTag("Player") != null)
         {
             GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = true;
         }
+        statsMenuController.confirmAbilityPointSpent(); 
     }
 
-    public void switchToMenu(GameObject InactiveMenu)
+    public override void switchToMenu(GameObject InactiveMenu)
     {
         Menu.SetActive(false);
         InactiveMenu.SetActive(true);
@@ -74,6 +55,6 @@ public class MenuToggle : MonoBehaviour
         {
             GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
         }
+        statsMenuController.confirmAbilityPointSpent();
     }
-
 }

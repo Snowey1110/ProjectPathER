@@ -1424,7 +1424,7 @@ GameObject:
   m_Component:
   - component: {fileID: 713796120}
   - component: {fileID: 713796121}
-  - component: {fileID: 713796122}
+  - component: {fileID: 713796123}
   m_Layer: 0
   m_Name: SettingMenu
   m_TagString: Untagged
@@ -1461,7 +1461,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hideAtStart: {fileID: 713796119}
---- !u!114 &713796122
+--- !u!114 &713796123
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1470,7 +1470,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 713796119}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
+  m_Script: {fileID: 11500000, guid: 5293e10a3a0e85f4ba22975721df0c10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Menu: {fileID: 713796119}
@@ -1545,8 +1545,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1920, y: 1080}
+  m_AnchoredPosition: {x: 0, y: -0.0020828}
+  m_SizeDelta: {x: 1920, y: 1119.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &819152889
 MonoBehaviour:
@@ -1744,7 +1744,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 713796122}
+      - m_Target: {fileID: 713796123}
         m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
         m_MethodName: toggleMenu
         m_Mode: 1
@@ -2071,17 +2071,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1289225927}
-  m_LocalRotation: {x: 0, y: 0, z: 0.05503734, w: 0.99848425}
+  m_LocalRotation: {x: 0, y: 0, z: 0.06801532, w: 0.9976843}
   m_LocalPosition: {x: 0, y: 0, z: 71}
   m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 575798739}
   m_Father: {fileID: 322438885}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 6.31}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 7.8}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 633, y: 294}
+  m_AnchoredPosition: {x: 643, y: 311}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1289225929
@@ -2824,7 +2824,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 604, y: 152}
+  m_AnchoredPosition: {x: 606, y: 160}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1742792054
@@ -2871,7 +2871,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 713796122}
+      - m_Target: {fileID: 713796123}
         m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
         m_MethodName: toggleMenu
         m_Mode: 1
