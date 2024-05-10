@@ -41,13 +41,17 @@ public class statsMenuController : MonoBehaviour
 
     public void loadStats()
     {
-        LEVEL.text = "Level: " + GameObject.FindWithTag("Player").GetComponent<stats>().level;
-        ATK.text = "ATK: " + GameObject.FindWithTag("Player").GetComponent<stats>().baseDamage;
-        DEF.text = "DEF: " + GameObject.FindWithTag("Player").GetComponent<stats>().defense;
-        SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<Player>().speed;
-        HPP.text = "HP: " + GameObject.FindWithTag("Player").GetComponent<stats>().HP;
-        MPP.text = "MP: " + GameObject.FindWithTag("Player").GetComponent<stats>().mana;
-        SKILLPOINTS.text = "Ability Points remaining: : " + GameObject.FindWithTag("Player").GetComponent<stats>().abilityPoints;
+        if (GameObject.FindWithTag("Player") != null)
+        {
+            LEVEL.text = "Level: " + GameObject.FindWithTag("Player").GetComponent<stats>().level;
+            ATK.text = "ATK: " + GameObject.FindWithTag("Player").GetComponent<stats>().baseDamage;
+            DEF.text = "DEF: " + GameObject.FindWithTag("Player").GetComponent<stats>().defense;
+            SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<Player>().speed;
+            HPP.text = "HP: " + GameObject.FindWithTag("Player").GetComponent<stats>().HP;
+            MPP.text = "MP: " + GameObject.FindWithTag("Player").GetComponent<stats>().mana;
+            SKILLPOINTS.text = "Ability Points remaining: : " + GameObject.FindWithTag("Player").GetComponent<stats>().abilityPoints;
+        }
+
     }
 
     public void levelStatsByOne(string statType)

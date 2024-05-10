@@ -11,6 +11,7 @@ public class LevelMenu : MenuToggle
         {
             if (Menu.activeSelf)
             {
+                
                 Menu.SetActive(false);
                 if (GameObject.FindWithTag("Player") != null)
                 {
@@ -24,13 +25,20 @@ public class LevelMenu : MenuToggle
                 {
                     GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
                 }
+                if (statsMenuController != null)
+                {
+                    statsMenuController.confirmAbilityPointSpent();
+                }
+                else
+                {
+                    Debug.LogWarning("statsMenuController is not assigned!");
+                }
             }
         }
         else
         {
             Debug.LogWarning("Menu GameObject is not assigned!");
         }
-        statsMenuController.confirmAbilityPointSpent();
     }
     public override void openMenu()
     {
@@ -49,12 +57,14 @@ public class LevelMenu : MenuToggle
 
     public override void switchToMenu(GameObject InactiveMenu)
     {
-        Menu.SetActive(false);
-        InactiveMenu.SetActive(true);
         if (GameObject.FindWithTag("Player") != null)
         {
             GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = false;
         }
-        statsMenuController.confirmAbilityPointSpent();
+        InactiveMenu.SetActive(true);
+        Menu.SetActive(false);
+        
+
+        
     }
 }
