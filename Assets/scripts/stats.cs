@@ -15,7 +15,7 @@ public class stats : MonoBehaviour
     public int baseDamage;
     public int level;
     public int abilityPoints;
-    public int totalAbilityPoints;
+    public int skillPoints = 1;
 
 
 
@@ -27,7 +27,6 @@ public class stats : MonoBehaviour
         
         currentHealth = HP;
         healthBar.SetMaxHealth(HP, currentHealth);
-        totalAbilityPoints = abilityPoints;
         //GameObject player = GameObject.FindWithTag("Player");
         //float speed = player.GetComponent<Player>().speed;
 

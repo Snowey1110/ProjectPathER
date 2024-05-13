@@ -520,6 +520,7 @@ MonoBehaviour:
   baseDamage: 1
   level: 0
   abilityPoints: 11
+  skillPoints: 2
   allowCombat: 1
 --- !u!114 &3068659195765762958
 MonoBehaviour:
@@ -546,7 +547,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
-  dashLvl: 5
+  dashLvl: 0
   arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
   chargingSpeed: 10
   maxCharge: 100

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-// Code inspired by BMo, video: https://youtu.be/y2N_J391ptg?si=O1Td_A-A7zCR_3iC
+
 public class TooltipManager : MonoBehaviour
 {
 
     public static TooltipManager _instance;
-    public TextMeshProUGUI textComponent;
+    public Tooltip tooltip;
 
     private void Awake()
     {
@@ -24,28 +24,16 @@ public class TooltipManager : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
+
+
+    public static void Show(string content, string header="")
     {
-        Cursor.visible = true;
-        gameObject.SetActive(false);
-        textComponent.canvas.sortingOrder = 999;
+        _instance.tooltip.SetText(content, header);
+        _instance.tooltip.gameObject.SetActive(true);
     }
 
-    // Update is called once per frame
-    void Update()
+    public static void Hide()
     {
-        transform.position = Input.mousePosition;
-    }
-
-    public void setAndShowToolTip(string message)
-    {
-        gameObject.SetActive(true);
-        textComponent.text = message;
-    }
-
-    public void hideToolTip()
-    {
-        gameObject.SetActive(false);
-        textComponent.text = string.Empty;
+        _instance.tooltip.gameObject.SetActive(false);
     }
 }
