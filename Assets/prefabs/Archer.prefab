@@ -546,13 +546,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8bb7b815ce73b044b48dcc7ec0c697c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 0}
+  animator: {fileID: 5161156361555879160}
   dashLvl: 0
+  attacking: 0
   arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
-  chargingSpeed: 10
-  maxCharge: 100
   shootForce: 10
-  aimIndicator: {fileID: 2577825563109100944, guid: f15599680e71a224989e18a68e6b596a, type: 3}
+  shootCooldown: 0.8
 --- !u!95 &5161156361555879160
 Animator:
   serializedVersion: 5

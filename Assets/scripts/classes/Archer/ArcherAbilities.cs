@@ -12,7 +12,7 @@ public class ArcherAbilities : MonoBehaviour
     public int dashLvl = 5;
     private bool dashCD = false;
 
-
+    /*
     //Shoot
     public GameObject arrowPrefab;
     public float chargingSpeed = 10f; //incremental multiplier
@@ -22,6 +22,15 @@ public class ArcherAbilities : MonoBehaviour
     private Vector3 shootDir;
     private bool isCharging = false;
     public GameObject aimIndicator;
+    */
+
+    //New shoot
+    public bool attacking;
+    public GameObject arrowPrefab;
+    public float shootForce = 10f; 
+    public float shootCooldown = 2f;
+    private float nextShootTime = 0f;
+    private Vector3 shootDir;
 
 
     void Start()
@@ -32,7 +41,7 @@ public class ArcherAbilities : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        /*
         //Shoot
         if (Input.GetMouseButtonDown(0) && GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat)
         {
@@ -65,6 +74,30 @@ public class ArcherAbilities : MonoBehaviour
             rb2d.AddForce(shootDir * shootForce * currentCharge);
             currentCharge = 1f; //reset the current charge after firing
         }
+        */
+
+        //New Shoot
+        
+
+        if (Input.GetMouseButton(0) && Time.time >= nextShootTime)
+        {
+            attacking = true;
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePos.z = 0;
+
+
+            shootDir = (mousePos - transform.position).normalized;
+            ShootArrow();
+
+            nextShootTime = Time.time + shootCooldown; // set the next shoot time
+        }
+
+        if (!Input.GetMouseButton(0))
+        {
+            attacking = false;
+        }
+        animator.SetBool("attacking", attacking);
+
 
         //Dash
         if (Input.GetKeyDown(KeyCode.Q) && !dashCD)
@@ -137,5 +170,12 @@ public class ArcherAbilities : MonoBehaviour
     void ResetCooldown()
     {
         dashCD = false;
+    }
+
+    void ShootArrow()
+    {
+        GameObject arrow = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
+        Rigidbody2D rb2d = arrow.GetComponent<Rigidbody2D>();
+        rb2d.AddForce(shootDir * shootForce, ForceMode2D.Impulse);
     }
 }

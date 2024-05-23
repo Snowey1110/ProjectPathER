@@ -616,7 +616,7 @@ GameObject:
   - component: {fileID: 135179800}
   - component: {fileID: 135179799}
   m_Layer: 5
-  m_Name: Text (TMP) (1)
+  m_Name: Level Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -638,8 +638,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 67, y: -20.199999}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 12.0021, y: -7.1496}
+  m_SizeDelta: {x: 90.0042, y: 23.8993}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &135179799
 MonoBehaviour:
@@ -724,7 +724,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -5.6493454, y: 0, z: 110.72682, w: 25.98693}
+  m_margin: {x: -5.6493454, y: 0, z: 0.7310486, w: 0.8183718}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3282,6 +3282,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 733868954}
   m_CullTransparentMesh: 1
+--- !u!95 &745091550 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5161156361555879160, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
+  m_PrefabInstance: {fileID: 814783656}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &814783656
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3290,9 +3295,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 993466185380105959, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: m_Enabled
-      value: 1
+    - target: {fileID: -6463144944851848017, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 745091550}
+    - target: {fileID: -6463144944851848017, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
+      propertyPath: shootCooldown
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 3054137871495463858, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
       propertyPath: m_AnchorMax.x
@@ -3342,30 +3351,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5534538148860239083, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: ATK
-      value: 
-      objectReference: {fileID: 194577834}
-    - target: {fileID: 5534538148860239083, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: DEF
-      value: 
-      objectReference: {fileID: 1520240863}
-    - target: {fileID: 5534538148860239083, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: HPP
-      value: 
-      objectReference: {fileID: 860556787}
-    - target: {fileID: 5534538148860239083, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: MPP
-      value: 
-      objectReference: {fileID: 34241527}
-    - target: {fileID: 5534538148860239083, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: SPD
-      value: 
-      objectReference: {fileID: 1308850718}
-    - target: {fileID: 5534538148860239083, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: SKILLPOINTS
-      value: 
-      objectReference: {fileID: 902881333}
     - target: {fileID: 8616637710575777061, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
       propertyPath: m_Name
       value: Archer
@@ -4071,7 +4056,7 @@ GameObject:
   - component: {fileID: 973084145}
   - component: {fileID: 973084144}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Skills
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4093,8 +4078,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 170, y: -20.199999}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 67.582146, y: -6.0591}
+  m_SizeDelta: {x: -5.4643, y: 42.1418}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &973084144
 MonoBehaviour:
@@ -4179,7 +4164,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -5.6493454, y: 0, z: 110.72682, w: 25.98693}
+  m_margin: {x: -5.6493454, y: 8.38958, z: -96.21444, w: 3.6148815}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -9352,13 +9337,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spider
       objectReference: {fileID: 0}
-    - target: {fileID: 4634240141764362140, guid: 9184f67549d082e4a87d2d598e00dff3, type: 3}
-      propertyPath: m_AnchorMax.x
+    - target: {fileID: 3762232469672404249, guid: 9184f67549d082e4a87d2d598e00dff3, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4634240141764362140, guid: 9184f67549d082e4a87d2d598e00dff3, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4634240141764362140, guid: 9184f67549d082e4a87d2d598e00dff3, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7344748948343925884, guid: 9184f67549d082e4a87d2d598e00dff3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9513,7 +9502,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7039041938612107331, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

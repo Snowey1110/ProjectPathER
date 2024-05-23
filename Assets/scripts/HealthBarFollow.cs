@@ -14,6 +14,14 @@ public class HealthBarFollow : MonoBehaviour
     }
     private void Update()
     {
-        rectTransform.anchoredPosition = objectToFollow.localPosition;
+        if (objectToFollow == null)
+        {
+            Destroy(transform.parent.gameObject);
+        }
+        if (objectToFollow != null)
+        {
+            rectTransform.anchoredPosition = objectToFollow.localPosition;
+        }
+        
     }
 }
