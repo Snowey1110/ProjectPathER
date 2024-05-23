@@ -22,9 +22,5 @@ public class keepOneCopy : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        hideAtStart.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-        hideAtStart.SetActive(false);
-    }
+
 }

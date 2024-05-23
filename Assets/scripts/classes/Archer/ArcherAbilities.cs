@@ -81,15 +81,18 @@ public class ArcherAbilities : MonoBehaviour
 
         if (Input.GetMouseButton(0) && Time.time >= nextShootTime)
         {
-            attacking = true;
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mousePos.z = 0;
+            if (GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat) {
+                attacking = true;
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                mousePos.z = 0;
 
 
-            shootDir = (mousePos - transform.position).normalized;
-            ShootArrow();
+                shootDir = (mousePos - transform.position).normalized;
+                ShootArrow();
 
-            nextShootTime = Time.time + shootCooldown; // set the next shoot time
+                nextShootTime = Time.time + shootCooldown;
+            }
+
         }
 
         if (!Input.GetMouseButton(0))
