@@ -1683,6 +1683,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1239634416704308378, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1283989189614260544, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -1690,6 +1694,10 @@ PrefabInstance:
     - target: {fileID: 1975225618710583391, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2979091453745775044, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+      propertyPath: m_IsOn
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3653609832025755360, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_Pivot.x
@@ -1783,6 +1791,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Setting Menu
       objectReference: {fileID: 0}
+    - target: {fileID: 6882394661695719690, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 41a079f8289b7cd4eac16747beaead53, type: 3}
     - target: {fileID: 8312279565280375663, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
