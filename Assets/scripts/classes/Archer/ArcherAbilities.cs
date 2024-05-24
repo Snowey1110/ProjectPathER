@@ -31,11 +31,12 @@ public class ArcherAbilities : MonoBehaviour
     public float shootCooldown = 2f;
     private float nextShootTime = 0f;
     private Vector3 shootDir;
+    private SpriteRenderer spriteRenderer;
 
 
     void Start()
     {
-        
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -85,6 +86,18 @@ public class ArcherAbilities : MonoBehaviour
                 attacking = true;
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 mousePos.z = 0;
+
+                // Determine the direction to flip the archer
+                if (mousePos.x < transform.position.x)
+                {
+                    // Mouse is on the left side of the archer
+                    spriteRenderer.flipX = true;
+                }
+                else
+                {
+                    // Mouse is on the right side of the archer
+                    spriteRenderer.flipX = false;
+                }
 
 
                 shootDir = (mousePos - transform.position).normalized;

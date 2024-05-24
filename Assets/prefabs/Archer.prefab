@@ -551,7 +551,7 @@ MonoBehaviour:
   attacking: 0
   arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
   shootForce: 10
-  shootCooldown: 0.8
+  shootCooldown: 0.7
 --- !u!95 &5161156361555879160
 Animator:
   serializedVersion: 5

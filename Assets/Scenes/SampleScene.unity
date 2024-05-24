@@ -3282,11 +3282,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 733868954}
   m_CullTransparentMesh: 1
---- !u!95 &745091550 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5161156361555879160, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-  m_PrefabInstance: {fileID: 814783656}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &814783656
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3295,14 +3290,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -6463144944851848017, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: animator
-      value: 
-      objectReference: {fileID: 745091550}
-    - target: {fileID: -6463144944851848017, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-      propertyPath: shootCooldown
-      value: 0.8
-      objectReference: {fileID: 0}
     - target: {fileID: 3054137871495463858, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
       propertyPath: m_AnchorMax.x
       value: 1

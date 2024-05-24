@@ -33,14 +33,22 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.D))
         {
-            GetComponent<SpriteRenderer>().flipX = false;
+            if (animator.GetBool("attacking") != true)
+            {
+                GetComponent<SpriteRenderer>().flipX = false;
+            }
+            
             moveDir.x += 1;
             isWalking = true;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
-            GetComponent<SpriteRenderer>().flipX = true;
+            if (animator.GetBool("attacking") != true)
+            {
+                GetComponent<SpriteRenderer>().flipX = true;
+            }
+            
             moveDir.x -= 1;
             isWalking = true;
         }
