@@ -17,7 +17,12 @@ public class button : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-
+    public void statsPage()
+    {
+        GameObject statsPage = GameObject.FindGameObjectWithTag("LevelController");
+        MenuToggle statsMenu = statsPage.GetComponent<MenuToggle>();
+        statsMenu.toggleMenu();
+    }
     public void QutiGame()
     {
         Application.Quit();

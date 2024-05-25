@@ -4261,6 +4261,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Setting Menu
       objectReference: {fileID: 0}
+    - target: {fileID: 7310024927558773620, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+      propertyPath: SettingMenu
+      value: 
+      objectReference: {fileID: 1218494735}
     - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
@@ -4268,14 +4272,14 @@ PrefabInstance:
     - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1226701701}
+      objectReference: {fileID: 1654849736}
     - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: toggleMenu
+      value: statsPage
       objectReference: {fileID: 0}
     - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: LevelMenu, Assembly-CSharp
+      value: button, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
@@ -4300,7 +4304,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8120079301377246306, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1654849736}
   m_SourcePrefab: {fileID: 100100000, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
 --- !u!1 &1042949699
 GameObject:
@@ -4432,9 +4439,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1055817725}
+  - component: {fileID: 1055817726}
   m_Layer: 0
   m_Name: LevelController
-  m_TagString: Untagged
+  m_TagString: LevelController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4455,6 +4463,20 @@ Transform:
   - {fileID: 2110934322}
   m_Father: {fileID: 519420032}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1055817726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055817724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Menu: {fileID: 1226701694}
+  SettingMenu: {fileID: 0}
 --- !u!1 &1065895780
 GameObject:
   m_ObjectHideFlags: 0
@@ -4978,7 +5000,7 @@ GameObject:
   - component: {fileID: 1226701700}
   m_Layer: 5
   m_Name: LEVEL Menu
-  m_TagString: Untagged
+  m_TagString: LEVEL Menu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7063,6 +7085,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1638986974}
   m_CullTransparentMesh: 1
+--- !u!1 &1654849730 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8120079301377246306, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+  m_PrefabInstance: {fileID: 1024015117}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1654849736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654849730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c1db371e80810447ae627bda32f446c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1660631578
 GameObject:
   m_ObjectHideFlags: 0

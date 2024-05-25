@@ -16,7 +16,7 @@ public class abilityUpgradeManager : MonoBehaviour, IPointerDownHandler, IPointe
     private float elapsed = 0;
     private float duration = 2;
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (isHolding && !progressSlider.gameObject.activeSelf)
         {

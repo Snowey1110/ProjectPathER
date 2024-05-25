@@ -41,7 +41,11 @@ public class PauseManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         isPaused = false;
-        escapeMenu.SetActive(false);
+        if (escapeMenu != null)
+        {
+            escapeMenu.SetActive(false);
+        }
+        
         if (GameObject.FindWithTag("Player") != null)
         {
             GameObject.FindWithTag("Player").GetComponent<stats>().allowCombat = true;
