@@ -553,17 +553,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &465842941 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8326815812520174853, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-  m_PrefabInstance: {fileID: 7649526796468619334}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &532486873
 GameObject:
   m_ObjectHideFlags: 0
@@ -951,7 +940,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 13676883}
         m_TargetAssemblyTypeName: button, Assembly-CSharp
-        m_MethodName: SwitchToGameScene
+        m_MethodName: QutiGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1505,6 +1494,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1513669593}
   m_CullTransparentMesh: 1
+--- !u!114 &1717955443 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8326815812520174853, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+  m_PrefabInstance: {fileID: 2119548144}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b2eec7b73fe2f242b5f7a4e0839e216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1742792052
 GameObject:
   m_ObjectHideFlags: 0
@@ -1589,7 +1589,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 465842941}
+      - m_Target: {fileID: 1717955443}
         m_TargetAssemblyTypeName: MenuToggle, Assembly-CSharp
         m_MethodName: toggleMenu
         m_Mode: 1
@@ -1639,39 +1639,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1742792052}
   m_CullTransparentMesh: 1
---- !u!1 &2120951517
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2120951519}
-  m_Layer: 0
-  m_Name: Sounds
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2120951519
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2120951517}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.762445, y: 0.12823766, z: 91.312386}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 279724702}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &7649526796468619334
+--- !u!1001 &2119548144
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -1683,10 +1651,6 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1239634416704308378, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1283989189614260544, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -1694,10 +1658,6 @@ PrefabInstance:
     - target: {fileID: 1975225618710583391, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_IsActive
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2979091453745775044, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_IsOn
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3653609832025755360, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_Pivot.x
@@ -1789,12 +1749,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5457769991825956193, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_Name
-      value: Setting Menu
+      value: Setting Menu Controller
       objectReference: {fileID: 0}
-    - target: {fileID: 6882394661695719690, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: 41a079f8289b7cd4eac16747beaead53, type: 3}
     - target: {fileID: 8312279565280375663, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -1808,6 +1764,38 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+--- !u!1 &2120951517
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2120951519}
+  m_Layer: 0
+  m_Name: Sounds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2120951519
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120951517}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.762445, y: 0.12823766, z: 91.312386}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 279724702}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1816,4 +1804,4 @@ SceneRoots:
   - {fileID: 326698662}
   - {fileID: 13676884}
   - {fileID: 2120951519}
-  - {fileID: 7649526796468619334}
+  - {fileID: 2119548144}

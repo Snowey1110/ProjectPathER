@@ -5,11 +5,19 @@ using UnityEngine;
 public class MenuToggle : MonoBehaviour
 {
     public GameObject Menu;
+    public PauseManager SettingMenu;
 
 
-    void Start()
+    void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (Menu.activeSelf)
+            {
+                Menu.SetActive(false);
+                SettingMenu.UnpauseGame();
+            }
+        }
     }
     public virtual void toggleMenu()
     {
@@ -18,10 +26,12 @@ public class MenuToggle : MonoBehaviour
             if (Menu.activeSelf)
             {
                 Menu.SetActive(false);
+                SettingMenu.UnpauseGame();
             }
             else
             {
                 Menu.SetActive(true);
+                SettingMenu.PauseGame();
             }
         }
         else
@@ -32,12 +42,13 @@ public class MenuToggle : MonoBehaviour
     public virtual void openMenu()
     {
         Menu.SetActive(true);
+        SettingMenu.PauseGame();
 
     }
     public virtual void closeMenu()
     {
         Menu.SetActive(false);
-
+        SettingMenu.UnpauseGame();
     }
 
     public virtual void switchToMenu(GameObject InactiveMenu)

@@ -11,7 +11,7 @@ public class LevelMenu : MenuToggle
         {
             if (Menu.activeSelf)
             {
-                
+                SettingMenu.UnpauseGame();
                 Menu.SetActive(false);
                 if (GameObject.FindWithTag("Player") != null)
                 {
@@ -20,6 +20,7 @@ public class LevelMenu : MenuToggle
             }
             else
             {
+                SettingMenu.PauseGame();
                 Menu.SetActive(true);
                 if (GameObject.FindWithTag("Player") != null)
                 {
@@ -42,11 +43,13 @@ public class LevelMenu : MenuToggle
     }
     public override void openMenu()
     {
+        SettingMenu.PauseGame();
         Menu.SetActive(true);
 
     }
     public override void closeMenu()
     {
+        SettingMenu.UnpauseGame();
         Menu.SetActive(false);
         if (GameObject.FindWithTag("Player") != null)
         {

@@ -9,10 +9,20 @@ public class button : MonoBehaviour
     
     public void SwitchToGameScene()
     {
-        // Load the "game" scene
-        //SceneManager.LoadScene("Map");
         SceneManager.LoadScene("SampleScene");
     }
+
+    public void SwitchToMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+
+    public void QutiGame()
+    {
+        Application.Quit();
+    }
+    
 
 
 }
