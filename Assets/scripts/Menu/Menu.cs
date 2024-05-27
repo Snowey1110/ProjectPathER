@@ -8,6 +8,11 @@ public class MenuToggle : MonoBehaviour
     public PauseManager SettingMenu;
 
 
+    void Start()
+    {
+        GameObject settingMenuObject = GameObject.FindGameObjectWithTag("Setting Menu");
+        SettingMenu = settingMenuObject.GetComponent<PauseManager>();
+    }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))

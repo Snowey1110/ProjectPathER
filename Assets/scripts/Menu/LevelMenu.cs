@@ -5,6 +5,9 @@ using UnityEngine;
 public class LevelMenu : MenuToggle
 {
     public statsMenuController statsMenuController;
+
+
+
     public override void toggleMenu()
     {
         if (Menu != null)
