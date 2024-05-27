@@ -9,13 +9,19 @@ public class CameraController : MonoBehaviour
     private float panSpeed = 10f;
     private float panBorderThickness = 10f;
     private float zoomSpeed = 1000f;
-    private float minZoom = 1f;
+    private float minZoom = 10f;
     private float maxZoom = 20f;
     public bool controlWithMouse = true;
 
     public Camera cam;
     public GameObject player;
+    void Start()
+    {
+        // Set the initial zoom level to the maximum zoom level
+        cam.orthographicSize = maxZoom;
 
+   
+    }
     void Update()
     {
         if (player == null)
