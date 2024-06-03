@@ -8,6 +8,7 @@ TagManager:
   - LevelController
   - LEVEL Menu
   - Setting Menu
+  - Stats Button
   layers:
   - Default
   - TransparentFX

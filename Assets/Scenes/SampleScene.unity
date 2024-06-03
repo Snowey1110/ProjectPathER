@@ -4177,10 +4177,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1750458513479854058, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: SettingMenu
-      value: 
-      objectReference: {fileID: 1218494735}
     - target: {fileID: 3653609832025755360, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -4265,18 +4261,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Setting Menu
       objectReference: {fileID: 0}
-    - target: {fileID: 5457769991825956193, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_TagString
-      value: Setting Menu
-      objectReference: {fileID: 0}
     - target: {fileID: 7310024927558773620, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: SettingMenu
       value: 
       objectReference: {fileID: 1218494735}
-    - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -4289,33 +4277,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: button, Assembly-CSharp
       objectReference: {fileID: 0}
-    - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
-    - target: {fileID: 8579702993745786606, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 1218494735}
-    - target: {fileID: 8579702993745786606, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: MainMenuButton
-      objectReference: {fileID: 0}
-    - target: {fileID: 8579702993745786606, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PauseManager, Assembly-CSharp
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8120079301377246306, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1654849736}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
 --- !u!1 &1042949699
 GameObject:
@@ -32518,18 +32483,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1638986974}
   m_CullTransparentMesh: 1
---- !u!1 &1654849730 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8120079301377246306, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+--- !u!114 &1654849736 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6768335628593529250, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
   m_PrefabInstance: {fileID: 1024015117}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1654849736
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1654849730}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4c1db371e80810447ae627bda32f446c, type: 3}

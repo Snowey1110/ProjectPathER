@@ -1751,6 +1751,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Setting Menu Controller
       objectReference: {fileID: 0}
+    - target: {fileID: 7337460441834963902, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: statsPage
+      objectReference: {fileID: 0}
     - target: {fileID: 8312279565280375663, guid: 26f78171b825bf8489245f7a4627f409, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
