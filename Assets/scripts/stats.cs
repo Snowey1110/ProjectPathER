@@ -5,7 +5,6 @@ using TMPro;
 public class stats : MonoBehaviour
 {
     public HealthBar healthBar;
-    public Player player;
 
 
     public int HP;

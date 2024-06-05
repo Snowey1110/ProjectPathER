@@ -104,4 +104,22 @@ public class Slime : MonoBehaviour
     {
         animator.SetBool("jumping", false);
     }
+
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // Deal damage to the player
+            stats playerStats = collision.gameObject.GetComponent<stats>();
+            int slimeAttackStats = gameObject.GetComponent<stats>().baseDamage;
+            playerStats.takeDamage(slimeAttackStats);
+
+            // Knockback effect
+            Vector2 knockbackDirection = (transform.position - collision.transform.position).normalized;
+            float knockbackForce = 100.0f; 
+            rb.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
+        }
+    }
+
 }
