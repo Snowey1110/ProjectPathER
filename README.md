@@ -13,7 +13,7 @@ Project PathER is a 2D roguelike RPG where players embark on an exciting adventu
 ### Title Screen
 ![Title Screen](Gameplay/title.png)
 
-### Menus
+### GUIS
 ![Level Up System](Gameplay/1.png)
 ![Pause Menu](Gameplay/2.png)
 
