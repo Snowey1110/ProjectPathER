@@ -4,7 +4,7 @@ Project PathER is a 2D roguelike RPG where players embark on an exciting adventu
 
 ## Features
 - **Dynamic Leveling System**: Customize your character's stats with ability points.
-- **Combat**: Engage in fast-paced battles against enemies with real time visual feedback.
+- **Combat**: Engage in fast-paced battles against enemies with real-time visual feedback.
 - **Pixel-Art Design**: Enjoy a colorful, nostalgic visual experience.
 - **Roguelike Elements**: Experience procedurally generated content and challenging gameplay.
 
@@ -30,4 +30,5 @@ Project PathER is a 2D roguelike RPG where players embark on an exciting adventu
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/Project-PathER.git
+   git clone https://github.com/Snowey1110/ProjectPathER.git
+   
