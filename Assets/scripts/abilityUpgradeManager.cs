@@ -14,7 +14,7 @@ public class abilityUpgradeManager : MonoBehaviour, IPointerDownHandler, IPointe
 
     private bool isHolding = false;
     private float elapsed = 0;
-    private float duration = 2;
+    private float duration = 2f;
 
     private void FixedUpdate()
     {
@@ -62,7 +62,7 @@ public class abilityUpgradeManager : MonoBehaviour, IPointerDownHandler, IPointe
         TooltipManager.Hide();
         progressSlider.gameObject.SetActive(false);
         elapsed = 0;
-        fillImage.color = Color.white;
+        // fillImage.color = Color.white;
     }
 
     public void OnPointerDown(PointerEventData data)

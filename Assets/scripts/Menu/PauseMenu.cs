@@ -29,7 +29,7 @@ public class PauseManager : MonoBehaviour
     public void PauseGame()
     {
         
-        Time.timeScale = 0f;
+        Time.timeScale = 1f;
         isPaused = true;
         if (GameObject.FindWithTag("Player") != null)
         {
