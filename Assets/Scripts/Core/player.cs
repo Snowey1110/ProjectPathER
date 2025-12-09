@@ -66,5 +66,19 @@ public class Player : NetworkBehaviour
         animator.SetBool("walking", isWalking);
     }
 
+    public override void OnNetworkSpawn()
+    {
+        // Only run this if *I* am the one controlling this character
+        if (IsOwner)
+        {
+            // Find the camera in the scene
+            GameObject cam = GameObject.FindWithTag("MainCamera");
 
+            if (cam != null)
+            {
+                // Tell the camera: "Hey, follow ME!"
+                cam.GetComponent<CameraController>().player = this.gameObject;
+            }
+        }
+    }
 }
