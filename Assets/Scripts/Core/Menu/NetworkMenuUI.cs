@@ -7,32 +7,72 @@ using UnityEngine.SceneManagement;
 public class NetworkMenuUI : MonoBehaviour
 {
     [Header("UI References")]
-    public TMP_InputField ipAddressInput;
-
-    public void OnStartHostClicked()
+    public TMP_InputField ipInputField;
+    private void Start()
     {
-        // Host always listens on localhost (0.0.0.0)
-        NetworkManager.Singleton.StartHost();
-        NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+        // Hide the input field when the game starts
+        if (ipInputField != null)
+            ipInputField.gameObject.SetActive(false);
+
+        // Listen for the "Enter" key specifically on this input field
+        // When user hits Enter, we pass the text to our connection logic
+        if (ipInputField != null)
+            ipInputField.onSubmit.AddListener(OnInputSubmit);
     }
 
-    public void OnJoinGameClicked()
+    // Link this to your "Multiplayer/Join" Button
+    public void OnMultiplayerButtonClicked()
     {
-        // Setup the Connection Data
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-
-        string ipText = ipAddressInput.text;
-        if (!string.IsNullOrEmpty(ipText))
+        // Check: Is the input field currently visible?
+        if (ipInputField.gameObject.activeSelf)
         {
-            transport.ConnectionData.Address = ipText;
+            AttemptConnection();
         }
         else
         {
-            transport.ConnectionData.Address = "127.0.0.1"; // Default to localhost
+            // Show it!
+            ipInputField.gameObject.SetActive(true);
+
+            ipInputField.Select();
+            ipInputField.ActivateInputField();
+        }
+    }
+
+    // Called automatically when user presses "Enter" while typing
+    private void OnInputSubmit(string text)
+    {
+        AttemptConnection();
+    }
+
+    private void AttemptConnection()
+    {
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        string ipText = ipInputField.text;
+
+        // Logic: If empty -> Use Localhost. If filled -> Use Input.
+        if (string.IsNullOrEmpty(ipText))
+        {
+            transport.ConnectionData.Address = "127.0.0.1";
+            Debug.Log("Connecting to Localhost...");
+        }
+        else
+        {
+            transport.ConnectionData.Address = ipText;
+            Debug.Log($"Connecting to {ipText}...");
         }
 
-        // Connect
+        // Connect!
         NetworkManager.Singleton.StartClient();
+
+        // Hide the input again after clicking
+        ipInputField.gameObject.SetActive(false);
+    }
+
+    // Link this to "Start Host" button
+    public void OnStartHostClicked()
+    {
+        NetworkManager.Singleton.StartHost();
+        NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     public void OnQuitClicked()
