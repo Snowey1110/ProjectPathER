@@ -2,19 +2,30 @@ using System.Globalization;
 using Unity.Netcode;
 using UnityEngine;
 
-public class Player : NetworkBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [SerializeField]
     public stats stats;
     public float speed;
     public Animator animator;
-    
+
+    private bool inputActive = true;
 
     void Start()
     {
 
     }
 
+    public void SetInputActive(bool active)
+    {
+        inputActive = active;
+
+        // Reset movement so they don't keep running while in menu
+        if (!active && GetComponent<Rigidbody2D>() != null)
+        {
+            GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+        }
+    }
 
     void Update()
     {

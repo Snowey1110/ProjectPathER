@@ -46,7 +46,7 @@ public class statsMenuController : MonoBehaviour
             LEVEL.text = "Level: " + GameObject.FindWithTag("Player").GetComponent<stats>().level;
             ATK.text = "ATK: " + GameObject.FindWithTag("Player").GetComponent<stats>().baseDamage;
             DEF.text = "DEF: " + GameObject.FindWithTag("Player").GetComponent<stats>().defense;
-            SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<Player>().speed;
+            SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<PlayerController>().speed;
             HPP.text = "HP: " + GameObject.FindWithTag("Player").GetComponent<stats>().HP;
             MPP.text = "MP: " + GameObject.FindWithTag("Player").GetComponent<stats>().mana;
             SKILLPOINTS.text = "Ability Points remaining: : " + GameObject.FindWithTag("Player").GetComponent<stats>().abilityPoints;
@@ -57,7 +57,7 @@ public class statsMenuController : MonoBehaviour
     public void levelStatsByOne(string statType)
     {
         var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
+        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
 
         if ((playerStats == null) || (playerMovements ==null))
         {
@@ -103,7 +103,7 @@ public class statsMenuController : MonoBehaviour
     public void levelStatsByTen(string statType)
     {
         var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
+        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
 
         if (playerStats == null)
         {
@@ -150,7 +150,7 @@ public class statsMenuController : MonoBehaviour
     public void resetAbilityPoints()
     {
         var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
+        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
         playerStats.abilityPoints += abilityPointSpent;
         abilityPointSpent = 0;
         playerStats.baseDamage -= tempATK;
@@ -204,7 +204,7 @@ public class statsMenuController : MonoBehaviour
                 break;
             case 2:
                 tempSPD += 1;
-                var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<Player>();
+                var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
                 if (playerMovements != null)
                 {
                     playerMovements.speed += 1;
