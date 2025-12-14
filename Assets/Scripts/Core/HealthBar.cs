@@ -14,7 +14,7 @@ public class HealthBar : MonoBehaviour
 
     void LateUpdate()
     {
-        transform.LookAt(transform.position + mainCamera.transform.rotation * Vector3.forward, mainCamera.transform.rotation * Vector3.up);
+        //transform.LookAt(transform.position + mainCamera.transform.rotation * Vector3.forward, mainCamera.transform.rotation * Vector3.up);
     }
 
     public void SetMaxHealth(int health, int currentHealth)
