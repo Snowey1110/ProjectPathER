@@ -11,11 +11,12 @@ GameObject:
   - component: {fileID: 2760712905809184863}
   - component: {fileID: 720514578165568756}
   - component: {fileID: 6437016894115552903}
-  - component: {fileID: 6754270937434778070}
   - component: {fileID: 8140334213744203286}
+  - component: {fileID: 4952673781577957128}
+  - component: {fileID: 397477884534376036}
   m_Layer: 0
   m_Name: NetPlayer
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -111,14 +112,6 @@ Camera:
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &6754270937434778070
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8865324222621171875}
-  m_Enabled: 1
 --- !u!114 &8140334213744203286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,3 +128,25 @@ MonoBehaviour:
   controlWithMouse: 1
   cam: {fileID: 6437016894115552903}
   player: {fileID: 0}
+--- !u!114 &4952673781577957128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8865324222621171875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e454bdd5477f15409020a5926082029, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerConnection
+  ShowTopMostFoldoutHeaderGroup: 1
+  lobbyCamera: {fileID: 6437016894115552903}
+--- !u!81 &397477884534376036
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8865324222621171875}
+  m_Enabled: 0

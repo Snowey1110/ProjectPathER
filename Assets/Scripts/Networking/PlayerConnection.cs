@@ -9,10 +9,25 @@ public class PlayerConnection : NetworkBehaviour
     {
         // Only the owner (you) should use this camera.
         // Disable it for other players so you don't see through their eyes.
-        if (!IsOwner)
+        if (IsOwner)
         {
+            // Turn on MY camera and listener
+            lobbyCamera.enabled = true;
+
+            // If the listener is on the same object as the camera:
+            if (lobbyCamera.TryGetComponent(out AudioListener listener))
+            {
+                listener.enabled = true;
+            }
+
+            // Also ensure the GameObject is active (if its disabled the whole object)
+            lobbyCamera.gameObject.SetActive(true);
+        }
+        else
+        {
+            // No, this belongs to someone else.
+            // Ensure their camera stays OFF so I don't see through their eyes.
             lobbyCamera.gameObject.SetActive(false);
-            GetComponent<AudioListener>().enabled = false;
         }
     }
 
