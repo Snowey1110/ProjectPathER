@@ -46,7 +46,7 @@ public class statsMenuController : MonoBehaviour
             LEVEL.text = "Level: " + GameObject.FindWithTag("Player").GetComponent<stats>().level;
             ATK.text = "ATK: " + GameObject.FindWithTag("Player").GetComponent<stats>().baseDamage;
             DEF.text = "DEF: " + GameObject.FindWithTag("Player").GetComponent<stats>().defense;
-            SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<PlayerController>().speed;
+            SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<PlayerController>().moveSpeed;
             HPP.text = "HP: " + GameObject.FindWithTag("Player").GetComponent<stats>().HP;
             MPP.text = "MP: " + GameObject.FindWithTag("Player").GetComponent<stats>().mana;
             SKILLPOINTS.text = "Ability Points remaining: : " + GameObject.FindWithTag("Player").GetComponent<stats>().abilityPoints;
@@ -79,7 +79,7 @@ public class statsMenuController : MonoBehaviour
                     break;
                 case "SPD":
                     tempSPD += 1;
-                    playerMovements.speed += 1;
+                    playerMovements.moveSpeed += 1;
                     break;
                 case "HPP":
                     tempHPP += 1;
@@ -125,7 +125,7 @@ public class statsMenuController : MonoBehaviour
                     break;
                 case "SPD":
                     tempSPD += 10;
-                    playerMovements.speed += 10;
+                    playerMovements.moveSpeed += 10;
                     break;
                 case "HPP":
                     tempHPP += 10;
@@ -162,7 +162,7 @@ public class statsMenuController : MonoBehaviour
         tempMPP = 0;
         playerStats.defense -= tempDEF;
         tempDEF = 0;
-        playerMovements.speed -= tempSPD;
+        playerMovements.moveSpeed -= tempSPD;
         tempSPD = 0;
         loadStats();
     }
@@ -207,7 +207,7 @@ public class statsMenuController : MonoBehaviour
                 var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
                 if (playerMovements != null)
                 {
-                    playerMovements.speed += 1;
+                    playerMovements.moveSpeed += 1;
                 }
                 break;
             case 3:

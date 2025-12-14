@@ -58,7 +58,7 @@ public class abilityUpgradeManager : MonoBehaviour, IPointerDownHandler, IPointe
     private void DoUpgrade()
     {
         GameObject.FindWithTag("Player").GetComponent<stats>().skillPoints -= requiredSkillPoints;
-        GameObject.FindWithTag("Player").GetComponent<ArcherAbilities>().dashLvl += 1;
+        //GameObject.FindWithTag("Player").GetComponent<ArcherAbilities>().dashLvl += 1;
         TooltipManager.Hide();
         progressSlider.gameObject.SetActive(false);
         elapsed = 0;

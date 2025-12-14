@@ -40,11 +40,19 @@ public class PlayerController : NetworkBehaviour
         InitializeAbilities();
         SetupInput();
 
-        // Attach Camera (Your existing logic)
-        GameObject cam = GameObject.FindWithTag("MainCamera");
-        if (cam != null)
+        CameraController camController = GetComponentInChildren<CameraController>();
+
+        if (camController != null)
         {
-            cam.GetComponent<CameraController>().player = this.gameObject;
+            camController.player = this.transform;
+            // The CameraController Start() will detach itself automatically!
+        }
+        else
+        {
+            // Fallback: If camera was already detached or in scene
+            GameObject camObj = GameObject.FindWithTag("MainCamera");
+            if (camObj != null)
+                camObj.GetComponent<CameraController>().player = this.transform;
         }
     }
 
@@ -121,6 +129,9 @@ public class PlayerController : NetworkBehaviour
 
     void HandleRotation()
     {
+        // SAFETY CHECK: If no camera exists, stop immediately to prevent crash
+        if (Camera.main == null) return;
+
         // Use Mouse Position for aiming direction
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 

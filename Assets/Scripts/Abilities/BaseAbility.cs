@@ -2,6 +2,9 @@ using UnityEngine;
 
 public abstract class BaseAbility : MonoBehaviour
 {
+    // Add this line so UI can see what level we are!
+    public int currentLevel = 1;
+
     // The name we will use to find this ability (e.g., "Dash")
     public string abilityName;
 
