@@ -236,7 +236,7 @@ GameObject:
   - component: {fileID: 254400688}
   m_Layer: 0
   m_Name: Knight Altar
-  m_TagString: Untagged
+  m_TagString: Altar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27367,6 +27367,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -975814854044699623, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 921824705
+      objectReference: {fileID: 0}
+    - target: {fileID: -975814854044699623, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -975814854044699623, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 1276885929
+      objectReference: {fileID: 0}
     - target: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: m_Name
       value: Slime

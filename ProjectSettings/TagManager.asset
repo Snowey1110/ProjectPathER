@@ -2,13 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags:
   - Enemy
   - LevelController
   - LEVEL Menu
   - Setting Menu
   - Stats Button
+  - Altar
   layers:
   - Default
   - TransparentFX
@@ -49,3 +50,5 @@ TagManager:
   - name: UI
     uniqueID: 3757460517
     locked: 0
+  m_RenderingLayers:
+  - Default
