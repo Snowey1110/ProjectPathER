@@ -301,7 +301,7 @@ GameObject:
   - component: {fileID: 1490249914077388598}
   m_Layer: 3
   m_Name: CameraHolder
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -515,6 +515,7 @@ GameObject:
   - component: {fileID: 8784960514633735012}
   - component: {fileID: 505532009114708831}
   - component: {fileID: 8895147916229528259}
+  - component: {fileID: 1590073603261474537}
   m_Layer: 3
   m_Name: Archer
   m_TagString: Player
@@ -535,8 +536,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2247766003688640231}
   - {fileID: 2802540803153437824}
+  - {fileID: 2247766003688640231}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7442509775723964772
@@ -610,7 +611,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3316762627
+  GlobalObjectIdHash: 3399499949
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -762,7 +763,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClientNetworkAnimator
   ShowTopMostFoldoutHeaderGroup: 1
-  TransitionStateInfoList: []
+  TransitionStateInfoList:
+  - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: 1673437632
+    DestinationState: -1588234362
+    TransitionDuration: 0
+    TriggerNameHash: 1203776827
+    TransitionIndex: 1
+  - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: 839609984
+    DestinationState: -1588234362
+    TransitionDuration: 0
+    TriggerNameHash: 1203776827
+    TransitionIndex: 1
   m_Animator: {fileID: 5161156361555879160}
 --- !u!114 &505532009114708831
 MonoBehaviour:
@@ -827,3 +842,20 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
+--- !u!114 &1590073603261474537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616637710575777061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83bc97e062629ac4d88a19a62eaaece9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ArcherAttack
+  ShowTopMostFoldoutHeaderGroup: 1
+  attackRate: 0.5
+  arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
+  arrowForce: 20
+  spawnOffset: 1.5

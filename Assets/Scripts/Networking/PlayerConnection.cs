@@ -37,15 +37,13 @@ public class PlayerConnection : NetworkBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = lobbyCamera.ScreenPointToRay(Input.mousePosition);
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            // Draw a visible red line in the Scene View to see where you aimed
-            Debug.DrawRay(ray.origin, ray.direction * 100, Color.red, 2f);
+            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
 
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (hit.collider != null)
             {
-                // Tell me EXACTLY what I hit
-                Debug.Log($"I hit: {hit.transform.name}");
+                Debug.Log("I hit: " + hit.collider.name);
 
                 if (hit.transform.TryGetComponent(out ClassAltar altar))
                 {

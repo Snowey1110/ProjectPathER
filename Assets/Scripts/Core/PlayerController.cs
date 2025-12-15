@@ -5,6 +5,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : NetworkBehaviour
 {
+
+    [Header("Combat")]
+    private BaseAttack primaryAttack;
+
     [Header("References")]
     [SerializeField] public stats stats; // Your existing stats script
     [SerializeField] private Rigidbody2D rb;
@@ -36,9 +40,7 @@ public class PlayerController : NetworkBehaviour
         if (rb == null) rb = GetComponent<Rigidbody2D>();
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // Setup Systems
-        InitializeAbilities();
-        SetupInput();
+
 
         CameraController camController = GetComponentInChildren<CameraController>();
 
@@ -54,20 +56,49 @@ public class PlayerController : NetworkBehaviour
             if (camObj != null)
                 camObj.GetComponent<CameraController>().player = this.transform;
         }
+
+        primaryAttack = GetComponent<BaseAttack>();
+
+        // Setup Systems
+        InitializeAbilities();
+        SetupInput();
     }
 
     private void SetupInput()
     {
         controls = new PlayerControls();
 
-        // Movement (WASD)
+        // Movement
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
 
-        // Ability 1 (Mapped to 'E' in your Input Actions) -> Calls "Dash"
+        // Abilities
         controls.Player.Ability1.performed += ctx => UseAbility("Dash", 1);
 
+        // ATTACK (Left Click)
+        controls.Player.Attack.performed += ctx => PerformAttack();
+
         if (inputActive) controls.Player.Enable();
+    }
+
+    private void PerformAttack()
+    {
+        // Safety Check: Does this hero actually have an attack script?
+        if (primaryAttack != null)
+        {
+            // Calculate Aim Direction (Mouse Position)
+            // (We handle the null camera check inside the attack script or here)
+            if (Camera.main == null) return;
+
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            Vector2 direction = (mousePos - (Vector2)transform.position).normalized;
+
+            // Fire the Primary Attack
+            primaryAttack.Fire(direction);
+
+            // Animation (Later move this inside the specific Attack script)
+            if (animator != null) animator.SetTrigger("attack");
+        }
     }
 
     private void InitializeAbilities()
@@ -112,7 +143,7 @@ public class PlayerController : NetworkBehaviour
 
         // Handle Rotation (Flipping)
         // Only flip if we are NOT attacking (prevents moonwalking while shooting)
-        if (!animator.GetBool("attacking"))
+        if (!animator.GetBool("attack"))
         {
             HandleRotation();
         }
