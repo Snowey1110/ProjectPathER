@@ -584,6 +584,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 336260174327504102, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6939816066081482115}
+    - target: {fileID: 336260174327504102, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CloseOptions
+      objectReference: {fileID: 0}
+    - target: {fileID: 336260174327504102, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: OptionsMenuController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 861426579129312557, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1413867258696315478, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1812659983754378057, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2088650487687453386, guid: 321f025553397cc458c645863ffe73e0, type: 3}
       propertyPath: m_Camera
       value: 
@@ -668,15 +692,69 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3829011295549186714, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4835184093700933045, guid: 321f025553397cc458c645863ffe73e0, type: 3}
       propertyPath: m_Name
       value: UI Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5631010347741313219, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7393436268461636330, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6939816066081482115}
+    - target: {fileID: 7393436268461636330, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OpenOptions
+      objectReference: {fileID: 0}
+    - target: {fileID: 7393436268461636330, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: OptionsMenuController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 8127932906414205560, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8911884527184288102, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4835184093700933045, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6939816066081482115}
   m_SourcePrefab: {fileID: 100100000, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+--- !u!1 &6939816066081482113 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4835184093700933045, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+  m_PrefabInstance: {fileID: 6939816066081482112}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6939816066081482114 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1413867258696315478, guid: 321f025553397cc458c645863ffe73e0, type: 3}
+  m_PrefabInstance: {fileID: 6939816066081482112}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6939816066081482115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6939816066081482113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0682aa635011db46927b6df0f88b799, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OptionsMenuController
+  optionsPanel: {fileID: 6939816066081482114}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
