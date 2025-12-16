@@ -52,7 +52,7 @@ public class NetworkMenuUI : MonoBehaviour
         // Logic: If empty -> Use Localhost. If filled -> Use Input.
         if (string.IsNullOrEmpty(ipText))
         {
-            transport.ConnectionData.Address = "127.0.0.1";
+            transport.ConnectionData.Address = "0.0.0.0";
             Debug.Log("Connecting to Localhost...");
         }
         else
