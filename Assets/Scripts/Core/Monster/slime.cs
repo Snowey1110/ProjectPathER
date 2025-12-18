@@ -13,7 +13,6 @@ public class Slime : MonoBehaviour
     private Rigidbody2D rb;              // Reference to the Rigidbody2D component
     private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
 
-    private float lastJumpTime = -Mathf.Infinity; // Tracks the time of the last jump
 
     void Start()
     {

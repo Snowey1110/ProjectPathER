@@ -850,10 +850,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
   ShowTopMostFoldoutHeaderGroup: 1
-  archerPrefab: {fileID: 8616637710575777061, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-  knightPrefab: {fileID: 8616637710575777061, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
+  archerPrefab: {fileID: -608415023881742550, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
+  knightPrefab: {fileID: -608415023881742550, guid: 3685582d490a8a04bb10dd60dddb548c, type: 3}
   magePrefab: {fileID: 0}
   healerPrefab: {fileID: 0}
+  spawnPoints: []
 --- !u!4 &1126466496
 Transform:
   m_ObjectHideFlags: 0
@@ -27160,6 +27161,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2060236181}
+  - component: {fileID: 2060236182}
   - component: {fileID: 2060236180}
   m_Layer: 0
   m_Name: Monster Spawner
@@ -27167,7 +27169,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2060236180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27180,7 +27182,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2cf2f08a113c3408d385f81a8bd94a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slimePrefab: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+  ShowTopMostFoldoutHeaderGroup: 1
+  slimePrefab: {fileID: -975814854044699623, guid: b63253f842341dd44940794c4f2415e4, type: 3}
   spawnRadius: 50
   minimumSpawnDistance: 40
   spawnInterval: 3
@@ -27201,6 +27204,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2060236182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2060236179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1860754418
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1001 &217130071758260890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27407,6 +27435,10 @@ PrefabInstance:
     - target: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: m_Name
       value: Slime
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
       objectReference: {fileID: 0}
     - target: {fileID: 2017377212658833638, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: m_LocalPosition.x

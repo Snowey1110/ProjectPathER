@@ -1,70 +1,63 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class SlimeSpawner : MonoBehaviour
+public class SlimeSpawner : NetworkBehaviour
 {
-    public GameObject slimePrefab;
-    public float spawnRadius = 30f; // Maximum radius around the player where slimes spawn
-    public float minimumSpawnDistance = 20f; // Minimum distance from the player for spawning slimes
-    public float spawnInterval = 10f; // Time in seconds between spawns
-    public int spawnCount = 3; // Number of slimes to spawn each time
-    public string playerTag = "Player";
+    [Header("Prefab (MUST have NetworkObject + NetworkTransform or NetworkRigidbody2D)")]
+    [SerializeField] private NetworkObject slimePrefab;
 
-    private Transform player; // Reference to the player's transform
+    [Header("Spawn Settings")]
+    [SerializeField] private float spawnRadius = 30f;
+    [SerializeField] private float minimumSpawnDistance = 20f;
+    [SerializeField] private float spawnInterval = 10f;
+    [SerializeField] private int spawnCount = 3;
+    [SerializeField] private string playerTag = "Player";
+
     private float spawnTimer;
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
-        spawnTimer = spawnInterval; // Initialize the timer
+        // Only the server spawns monsters.
+        spawnTimer = spawnInterval;
+        enabled = IsServer;
     }
 
     private void Update()
     {
-        if (player == null)
-        {
-            // Try to find the player in the scene
-            FindPlayer();
-            if (player == null)
-            {
-                // If the player is still not found, skip this frame
-                return;
-            }
-        }
+        if (!IsServer) return;
+        if (slimePrefab == null) return;
 
-        // Countdown the spawn timer
         spawnTimer -= Time.deltaTime;
-        if (spawnTimer <= 0f)
-        {
-            SpawnSlimes();
-            spawnTimer = spawnInterval; // Reset the timer
-        }
+        if (spawnTimer > 0f) return;
+
+        spawnTimer = spawnInterval;
+        SpawnSlimesServer();
     }
 
-    private void FindPlayer()
+    private void SpawnSlimesServer()
     {
-        GameObject playerObject = GameObject.FindGameObjectWithTag(playerTag);
-        if (playerObject != null)
-        {
-            player = playerObject.transform;
-            Debug.Log("Player found and assigned to spawner.");
-        }
-    }
+        GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
+        if (players == null || players.Length == 0) return;
 
-    private void SpawnSlimes()
-    {
+        // Pick a random player to spawn around (server-side).
+        Transform targetPlayer = players[Random.Range(0, players.Length)].transform;
+
         for (int i = 0; i < spawnCount; i++)
         {
             Vector3 spawnPosition;
+            int guard = 0;
 
-            // Ensure slimes spawn within the radius but outside the minimum distance
+            // Ensure we’re outside minimum distance.
             do
             {
-                Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
-                spawnPosition = player.position + randomOffset;
-            } 
-            while (Vector3.Distance(spawnPosition, player.position) < minimumSpawnDistance);
+                Vector3 randomOffset = (Vector3)Random.insideUnitCircle * spawnRadius;
+                spawnPosition = targetPlayer.position + randomOffset;
+                guard++;
+            }
+            while (Vector3.Distance(spawnPosition, targetPlayer.position) < minimumSpawnDistance && guard < 50);
 
-            // Spawn the slime prefab
-            Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
+            NetworkObject slime = Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
+            slime.Spawn(true);
         }
     }
 }

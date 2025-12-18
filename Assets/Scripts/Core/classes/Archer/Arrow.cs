@@ -1,49 +1,86 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Arrow : MonoBehaviour
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
+public class Arrow : NetworkBehaviour
 {
-    public float destroyTime = 3f;
-    bool hasHit;
+    [SerializeField] private float lifetimeSeconds = 3f;
 
-    void Start()
+    private Rigidbody2D rb;
+    private int damage;
+    private bool initialized;
+
+    private void Awake()
     {
-        Destroy(gameObject, destroyTime);
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // FixedUpdate for better physics manipulation
-    void FixedUpdate()
+    public override void OnNetworkSpawn()
     {
-        if (hasHit)
+        // Server simulates; clients render replicated motion.
+        if (!IsServer)
+        {
+            rb.simulated = false;
             return;
+        }
 
-        // Make the arrow face its move direction
-        float angle = Mathf.Atan2(GetComponent<Rigidbody2D>().linearVelocity.y, GetComponent<Rigidbody2D>().linearVelocity.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-       
+        rb.simulated = true;
+
+        // Optional but usually desirable for projectiles:
+        rb.gravityScale = 0f;
+
+        Invoke(nameof(DespawnSelf), lifetimeSeconds);
     }
 
-
-    void OnCollisionEnter2D(Collision2D collision)
+    // Called by ArcherAttack on the server right after Spawn()
+    public void ServerInit(Vector2 dir, float speed, int dmg)
     {
-        Destroy(transform.gameObject); // killing itself after hit
+        if (!IsServer) return;
 
-        hasHit = true;
-        //GetComponent<Rigidbody2D>().velocity = Vector2.zero; // Stop moving after hit
-        GetComponent<Rigidbody2D>().isKinematic = true; // Stop physics after hit
-        if (collision.gameObject.CompareTag("Enemy"))
+        damage = dmg;
+        initialized = true;
+
+        rb.linearVelocity = dir.normalized * speed;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        HandleHit(other);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        HandleHit(collision.collider);
+    }
+
+    private void HandleHit(Collider2D other)
+    {
+        if (!IsServer) return;
+        if (!initialized) return;
+        if (other == null) return;
+
+        // disable friendly fire here
+        // if (other.CompareTag("Player")) return;
+
+        // If it has stats, treat it as damageable (works for Untagged Slime).
+        stats s = other.GetComponent<stats>();
+        if (s != null)
         {
-            stats enemyHealth = collision.gameObject.GetComponent<stats>();
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            stats playerStats = player.GetComponent<stats>();
-            enemyHealth.takeDamage(playerStats.baseDamage);
+            s.takeDamage(damage);
+            DespawnSelf();
+            return;
         }
-        else
-        {
-            Destroy(collision.gameObject);
-        }
-             
-        
+
+        // Otherwise, hit world/props: still despawn (prevents bouncing forever).
+        DespawnSelf();
+    }
+
+    private void DespawnSelf()
+    {
+        if (!IsServer) return;
+
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+            NetworkObject.Despawn(true);
     }
 }
