@@ -232,6 +232,7 @@ GameObject:
   m_Component:
   - component: {fileID: 254400687}
   - component: {fileID: 254400686}
+  - component: {fileID: 254400689}
   - component: {fileID: 254400685}
   - component: {fileID: 254400688}
   m_Layer: 0
@@ -253,7 +254,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbac7cf0d61982f41ac01048a952836e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClassAltar
+  ShowTopMostFoldoutHeaderGroup: 1
   classType: 0
+  maxHp: 100
+  regenDelaySeconds: 5
+  regenPerSecond: 5
+  regenOnlyWhenClaimed: 0
+  freeClassWhenDestroyed: 0
+  occupiedVisual: {fileID: 0}
+  availableVisual: {fileID: 0}
 --- !u!212 &254400686
 SpriteRenderer:
   serializedVersion: 2
@@ -374,6 +383,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &254400689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254400684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 407974253
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &637043220
 GameObject:
   m_ObjectHideFlags: 0
@@ -652,6 +686,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1012816973}
   - component: {fileID: 1012816972}
+  - component: {fileID: 1012816975}
   - component: {fileID: 1012816971}
   - component: {fileID: 1012816974}
   m_Layer: 0
@@ -673,7 +708,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbac7cf0d61982f41ac01048a952836e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClassAltar
+  ShowTopMostFoldoutHeaderGroup: 1
   classType: 0
+  maxHp: 100
+  regenDelaySeconds: 5
+  regenPerSecond: 5
+  regenOnlyWhenClaimed: 0
+  freeClassWhenDestroyed: 0
+  occupiedVisual: {fileID: 0}
+  availableVisual: {fileID: 0}
 --- !u!212 &1012816972
 SpriteRenderer:
   serializedVersion: 2
@@ -794,6 +837,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &1012816975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012816970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 34248763
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1126466493
 GameObject:
   m_ObjectHideFlags: 0
@@ -854,9 +922,9 @@ MonoBehaviour:
   knightPrefab: {fileID: 8616637710575777061, guid: 3685582d490a8a04bb10dd60dddb548c, type: 3}
   magePrefab: {fileID: 0}
   healerPrefab: {fileID: 0}
-  baseSpawn: {x: 0, y: 0, z: 0}
-  spawnSeparation: 4
+  spawnPoints: []
   enforceUniqueClasses: 0
+  freeClassOnDisconnect: 0
 --- !u!4 &1126466496
 Transform:
   m_ObjectHideFlags: 0
@@ -27421,6 +27489,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5160297008106995960, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3456483283
+      objectReference: {fileID: 0}
+    - target: {fileID: -5160297008106995960, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5160297008106995960, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 176141625
+      objectReference: {fileID: 0}
     - target: {fileID: -975814854044699623, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 921824705

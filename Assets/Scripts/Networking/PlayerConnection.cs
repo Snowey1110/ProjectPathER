@@ -14,10 +14,10 @@ public class PlayerConnection : NetworkBehaviour
             lobbyCamera.gameObject.SetActive(false);
     }
 
-    void Update()
+    private void Update()
     {
         if (!IsOwner || _requestedSpawn) return;
-        if (lobbyCamera == null) return;
+        if (lobbyCamera == null || !lobbyCamera.gameObject.activeInHierarchy) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -26,49 +26,26 @@ public class PlayerConnection : NetworkBehaviour
 
             if (hit.collider == null) return;
 
-            ClassAltar altar = hit.collider.GetComponent<ClassAltar>();
-            if (altar == null) return;
+            // Prefer TryGetComponent for perf/clarity
+            if (!hit.collider.TryGetComponent(out ClassAltar altar)) return;
 
             Debug.Log($"Found Altar! Requesting: {altar.classType}");
+
             _requestedSpawn = true;
-            RequestSpawnServerRpc(altar.classType);
+
+            // Altar owns the "claimed" rule and calls LobbyManager on the server.
+            altar.TryUseServerRpc();
+
         }
     }
 
-    [ServerRpc(RequireOwnership = true)]
-    private void RequestSpawnServerRpc(ClassType classType, ServerRpcParams rpcParams = default)
+    private void LateUpdate()
     {
-        ulong senderId = rpcParams.Receive.SenderClientId;
+        if (!IsOwner) return;
 
-        bool success = LobbyManager.Instance != null && LobbyManager.Instance.TrySpawnCharacter(senderId, classType);
-
-        if (!success)
-        {
-            // Allow the client to try again if rejected
-            ReenableRequestClientRpc(new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } }
-            });
-            return;
-        }
-
-        // Disable lobby camera ONLY for the requesting client
-        DisableLobbyCameraClientRpc(new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } }
-        });
-    }
-
-    [ClientRpc]
-    private void DisableLobbyCameraClientRpc(ClientRpcParams rpcParams = default)
-    {
-        if (lobbyCamera != null)
-            lobbyCamera.gameObject.SetActive(false);
-    }
-
-    [ClientRpc]
-    private void ReenableRequestClientRpc(ClientRpcParams rpcParams = default)
-    {
-        _requestedSpawn = false;
+        // If you want: allow manual retry if nothing happened for some reason.
+        // Press R to unlock request state.
+        if (_requestedSpawn && Input.GetKeyDown(KeyCode.R))
+            _requestedSpawn = false;
     }
 }
