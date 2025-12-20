@@ -3,23 +3,23 @@ using UnityEngine;
 
 public class SlimeSpawner : NetworkBehaviour
 {
-    [Header("Prefab (MUST have NetworkObject + NetworkTransform or NetworkRigidbody2D)")]
-    [SerializeField] private NetworkObject slimePrefab;
-
-    [Header("Spawn Settings")]
+    [SerializeField] private GameObject slimePrefab;
     [SerializeField] private float spawnRadius = 30f;
     [SerializeField] private float minimumSpawnDistance = 20f;
     [SerializeField] private float spawnInterval = 10f;
     [SerializeField] private int spawnCount = 3;
-    [SerializeField] private string playerTag = "Player";
 
     private float spawnTimer;
 
     public override void OnNetworkSpawn()
     {
-        // Only the server spawns monsters.
+        if (!IsServer)
+        {
+            enabled = false;
+            return;
+        }
+
         spawnTimer = spawnInterval;
-        enabled = IsServer;
     }
 
     private void Update()
@@ -27,37 +27,56 @@ public class SlimeSpawner : NetworkBehaviour
         if (!IsServer) return;
         if (slimePrefab == null) return;
 
+        Transform targetPlayer = GetAnyPlayerTransform();
+        if (targetPlayer == null) return;
+
         spawnTimer -= Time.deltaTime;
         if (spawnTimer > 0f) return;
 
+        SpawnSlimes(targetPlayer);
         spawnTimer = spawnInterval;
-        SpawnSlimesServer();
     }
 
-    private void SpawnSlimesServer()
+    private Transform GetAnyPlayerTransform()
     {
-        GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
-        if (players == null || players.Length == 0) return;
+        if (NetworkManager.Singleton == null) return null;
 
-        // Pick a random player to spawn around (server-side).
-        Transform targetPlayer = players[Random.Range(0, players.Length)].transform;
+        foreach (var c in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            if (c?.PlayerObject != null)
+                return c.PlayerObject.transform;
+        }
 
+        return null;
+    }
+
+    private void SpawnSlimes(Transform player)
+    {
         for (int i = 0; i < spawnCount; i++)
         {
             Vector3 spawnPosition;
             int guard = 0;
 
-            // Ensure we’re outside minimum distance.
             do
             {
-                Vector3 randomOffset = (Vector3)Random.insideUnitCircle * spawnRadius;
-                spawnPosition = targetPlayer.position + randomOffset;
+                Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
+                randomOffset.z = 0f;
+                spawnPosition = player.position + randomOffset;
                 guard++;
             }
-            while (Vector3.Distance(spawnPosition, targetPlayer.position) < minimumSpawnDistance && guard < 50);
+            while (Vector3.Distance(spawnPosition, player.position) < minimumSpawnDistance && guard < 50);
 
-            NetworkObject slime = Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
-            slime.Spawn(true);
+            GameObject slime = Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
+
+            var no = slime.GetComponent<NetworkObject>();
+            if (no == null)
+            {
+                Debug.LogError("[SlimeSpawner] Slime prefab missing NetworkObject.");
+                Destroy(slime);
+                continue;
+            }
+
+            no.Spawn(true);
         }
     }
 }

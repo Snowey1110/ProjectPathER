@@ -1,83 +1,117 @@
-using UnityEngine;
-using Unity.Netcode;
-using System;
 using System.Collections.Generic;
+using Unity.Netcode;
+using UnityEngine;
 
 public class LobbyManager : NetworkBehaviour
 {
     public static LobbyManager Instance;
 
-    [Header("Class Prefabs")]
-    [SerializeField] private NetworkObject archerPrefab;
-    [SerializeField] private NetworkObject knightPrefab;
-    [SerializeField] private NetworkObject magePrefab;
-    [SerializeField] private NetworkObject healerPrefab;
+    [Header("Player Prefabs")]
+    [SerializeField] private GameObject archerPrefab;
+    [SerializeField] private GameObject knightPrefab;
+    [SerializeField] private GameObject magePrefab;
+    [SerializeField] private GameObject healerPrefab;
 
-    [Header("Optional Spawn Points")]
-    [SerializeField] private Transform[] spawnPoints;
+    [Header("Spawn")]
+    [SerializeField] private Vector3 baseSpawn = new Vector3(0, 0, 0);
+    [SerializeField] private float spawnSeparation = 4f;
 
-    private readonly Dictionary<ClassType, bool> classTakenStatus = new Dictionary<ClassType, bool>();
+    [Header("Rules")]
+    [SerializeField] private bool enforceUniqueClasses = false;
+
+    private readonly Dictionary<ClassType, bool> classTakenStatus = new();
+    private readonly Dictionary<ulong, NetworkObject> spawnedCharacters = new();
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
 
-        // Initialize all classes as free.
-        foreach (ClassType t in Enum.GetValues(typeof(ClassType)))
-            classTakenStatus[t] = false;
+        foreach (ClassType type in System.Enum.GetValues(typeof(ClassType)))
+            classTakenStatus[type] = false;
     }
 
-    public bool IsClassAvailable(ClassType type)
+    public override void OnNetworkSpawn()
     {
-        // Server truth.
-        if (!classTakenStatus.TryGetValue(type, out bool taken)) return true;
-        return !taken;
+        if (!IsServer) return;
+
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
     }
 
-    public void SpawnCharacter(ulong clientId, ClassType type)
+    private void OnDestroy()
+    {
+        if (NetworkManager.Singleton != null)
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (!IsServer) return;
+
+        if (spawnedCharacters.TryGetValue(clientId, out NetworkObject no) && no != null && no.IsSpawned)
+            no.Despawn(true);
+
+        spawnedCharacters.Remove(clientId);
+
+        // If you enforce unique classes, you’d also want to release the class here
+        // (requires tracking which class each client picked).
+    }
+
+    public bool TrySpawnCharacter(ulong clientId, ClassType classType)
     {
         if (!IsServer)
         {
-            Debug.LogError("[LobbyManager] SpawnCharacter called on client. This must run on server.");
-            return;
+            Debug.LogWarning("[LobbyManager] TrySpawnCharacter called on non-server.");
+            return false;
         }
 
-        if (!IsClassAvailable(type))
+        if (spawnedCharacters.ContainsKey(clientId))
         {
-            Debug.Log("[LobbyManager] Class already taken.");
-            return;
+            Debug.LogWarning($"[LobbyManager] Client {clientId} already has a character.");
+            return false;
         }
 
-        NetworkObject prefab = GetPrefab(type);
+        if (enforceUniqueClasses && classTakenStatus.TryGetValue(classType, out bool taken) && taken)
+        {
+            Debug.LogWarning($"[LobbyManager] Class {classType} already taken.");
+            return false;
+        }
+
+        GameObject prefab = GetPrefab(classType);
         if (prefab == null)
         {
-            Debug.LogError("[LobbyManager] Missing prefab for " + type);
-            return;
+            Debug.LogError($"[LobbyManager] Missing prefab for class {classType}. Check inspector assignments.");
+            return false;
         }
 
-        Vector3 pos = GetSpawnPosition();
-        NetworkObject character = Instantiate(prefab, pos, Quaternion.identity);
+        // Spread spawns out by clientId so they don't overlap
+        int slot = (int)(clientId % 8);
+        Vector3 spawnPos = baseSpawn + new Vector3(slot * spawnSeparation, 0f, 0f);
 
-        // Give ownership to selecting client.
-        character.SpawnWithOwnership(clientId, true);
+        GameObject playerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
+        NetworkObject netObj = playerObj.GetComponent<NetworkObject>();
 
-        classTakenStatus[type] = true;
+        if (netObj == null)
+        {
+            Debug.LogError($"[LobbyManager] Prefab {prefab.name} has no NetworkObject.");
+            Destroy(playerObj);
+            return false;
+        }
+
+        // Give ownership to the requesting client
+        netObj.SpawnWithOwnership(clientId);
+
+        spawnedCharacters[clientId] = netObj;
+
+        if (enforceUniqueClasses)
+            classTakenStatus[classType] = true;
+
+        return true;
     }
 
-    public void ReleaseClass(ClassType type)
+    private GameObject GetPrefab(ClassType classType)
     {
-        if (!IsServer) return;
-        classTakenStatus[type] = false;
-    }
-
-    private NetworkObject GetPrefab(ClassType type)
-    {
-        return type switch
+        return classType switch
         {
             ClassType.Archer => archerPrefab,
             ClassType.Knight => knightPrefab,
@@ -85,17 +119,5 @@ public class LobbyManager : NetworkBehaviour
             ClassType.Healer => healerPrefab,
             _ => null
         };
-    }
-
-    private Vector3 GetSpawnPosition()
-    {
-        if (spawnPoints != null && spawnPoints.Length > 0)
-        {
-            Transform t = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
-            if (t != null) return t.position;
-        }
-
-        // Fallback if no spawn points provided
-        return Vector3.zero;
     }
 }

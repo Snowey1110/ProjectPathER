@@ -850,11 +850,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
   ShowTopMostFoldoutHeaderGroup: 1
-  archerPrefab: {fileID: -608415023881742550, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-  knightPrefab: {fileID: -608415023881742550, guid: 3685582d490a8a04bb10dd60dddb548c, type: 3}
+  archerPrefab: {fileID: 8616637710575777061, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
+  knightPrefab: {fileID: 8616637710575777061, guid: 3685582d490a8a04bb10dd60dddb548c, type: 3}
   magePrefab: {fileID: 0}
   healerPrefab: {fileID: 0}
-  spawnPoints: []
+  baseSpawn: {x: 0, y: 0, z: 0}
+  spawnSeparation: 4
+  enforceUniqueClasses: 0
 --- !u!4 &1126466496
 Transform:
   m_ObjectHideFlags: 0
@@ -27188,7 +27190,6 @@ MonoBehaviour:
   minimumSpawnDistance: 40
   spawnInterval: 3
   spawnCount: 2
-  playerTag: Player
 --- !u!4 &2060236181
 Transform:
   m_ObjectHideFlags: 0

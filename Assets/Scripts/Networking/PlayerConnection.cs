@@ -5,100 +5,70 @@ public class PlayerConnection : NetworkBehaviour
 {
     [SerializeField] private Camera lobbyCamera;
 
-    private AudioListener lobbyListener;
+    private bool _requestedSpawn;
 
-    public override void OnNetworkSpawn()
+    private void Start()
     {
-        lobbyListener = lobbyCamera != null ? lobbyCamera.GetComponent<AudioListener>() : null;
-
-        // Ensure only the local owner has an active camera/audio under this NetworkObject.
-        SetLobbyCameraLocalState(IsOwner);
+        // Each client should only see their own lobby camera
+        if (!IsOwner && lobbyCamera != null)
+            lobbyCamera.gameObject.SetActive(false);
     }
 
-    private void SetLobbyCameraLocalState(bool isLocalOwner)
+    void Update()
     {
+        if (!IsOwner || _requestedSpawn) return;
         if (lobbyCamera == null) return;
-
-        // Keep the GameObject active (avoid weirdness with disabling parts of a networked hierarchy)
-        if (!lobbyCamera.gameObject.activeSelf)
-            lobbyCamera.gameObject.SetActive(true);
-
-        lobbyCamera.enabled = isLocalOwner;
-
-        if (lobbyListener != null)
-            lobbyListener.enabled = isLocalOwner;
-
-        // Prevent Camera.main from resolving to another client's camera
-        lobbyCamera.tag = isLocalOwner ? "MainCamera" : "Untagged";
-    }
-
-    private void Update()
-    {
-        if (!IsOwner) return;
-        if (lobbyCamera == null || !lobbyCamera.enabled) return;
 
         if (Input.GetMouseButtonDown(0))
         {
-            Vector2 mousePos = lobbyCamera.ScreenToWorldPoint(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+            Vector3 world = lobbyCamera.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(world, Vector2.zero);
 
-            if (hit.collider == null)
-            {
-                Debug.Log("I clicked, but the Raycast missed everything.");
-                return;
-            }
+            if (hit.collider == null) return;
 
-            Debug.Log("I hit: " + hit.collider.name);
+            ClassAltar altar = hit.collider.GetComponent<ClassAltar>();
+            if (altar == null) return;
 
-            if (hit.transform.TryGetComponent(out ClassAltar altar))
-            {
-                Debug.Log($"Found Altar! Requesting: {altar.classType}");
-                RequestSpawnServerRpc(altar.classType);
-            }
-            else
-            {
-                Debug.Log("I hit something, but it is NOT an Altar.");
-            }
+            Debug.Log($"Found Altar! Requesting: {altar.classType}");
+            _requestedSpawn = true;
+            RequestSpawnServerRpc(altar.classType);
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = true)]
     private void RequestSpawnServerRpc(ClassType classType, ServerRpcParams rpcParams = default)
     {
-        if (LobbyManager.Instance == null) return;
+        ulong senderId = rpcParams.Receive.SenderClientId;
 
-        // Use the actual sender, not OwnerClientId (more robust in host / ownership edge cases).
-        ulong senderClientId = rpcParams.Receive.SenderClientId;
+        bool success = LobbyManager.Instance != null && LobbyManager.Instance.TrySpawnCharacter(senderId, classType);
 
-        if (!LobbyManager.Instance.IsClassAvailable(classType))
+        if (!success)
         {
-            Debug.Log("Class is already taken!");
+            // Allow the client to try again if rejected
+            ReenableRequestClientRpc(new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } }
+            });
             return;
         }
 
-        LobbyManager.Instance.SpawnCharacter(senderClientId, classType);
-
-        // Disable lobby cam ONLY for the player who clicked the altar.
-        var sendParams = new ClientRpcParams
+        // Disable lobby camera ONLY for the requesting client
+        DisableLobbyCameraClientRpc(new ClientRpcParams
         {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new[] { senderClientId }
-            }
-        };
-        DisableLobbyCameraClientRpc(sendParams);
+            Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } }
+        });
     }
 
     [ClientRpc]
     private void DisableLobbyCameraClientRpc(ClientRpcParams rpcParams = default)
     {
-        if (!IsOwner) return;
-        if (lobbyCamera == null) return;
+        if (lobbyCamera != null)
+            lobbyCamera.gameObject.SetActive(false);
+    }
 
-        lobbyCamera.enabled = false;
-        if (lobbyListener != null) lobbyListener.enabled = false;
-
-        // Also untag so Camera.main won't point here anymore
-        lobbyCamera.tag = "Untagged";
+    [ClientRpc]
+    private void ReenableRequestClientRpc(ClientRpcParams rpcParams = default)
+    {
+        _requestedSpawn = false;
     }
 }

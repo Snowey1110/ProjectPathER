@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5595391150881925340}
   - component: {fileID: 1123923984085368016}
   - component: {fileID: -5821422611723694136}
-  - component: {fileID: 4123889264885656847}
+  - component: {fileID: 7839528749931463275}
   - component: {fileID: -7571131203915969294}
   - component: {fileID: 263298649798437726}
   - component: {fileID: 4316604934282109132}
@@ -170,7 +170,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &4123889264885656847
+--- !u!114 &7839528749931463275
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,7 +182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1670947368
+  GlobalObjectIdHash: 1398870338
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
