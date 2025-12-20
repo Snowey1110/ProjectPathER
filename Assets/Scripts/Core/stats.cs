@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
-using TMPro;
+
 public class stats : MonoBehaviour
 {
     public HealthBar healthBar;
-
 
     public int HP;
     public int currentHealth;
@@ -16,53 +14,42 @@ public class stats : MonoBehaviour
     public int abilityPoints;
     public int skillPoints = 1;
 
+    private NetworkObject _netObj;
 
+    private void Awake()
+    {
+        _netObj = GetComponent<NetworkObject>();
+    }
 
-    public bool allowCombat = true;
-
-    // Checking if the unit should be dead
     private void Start()
     {
-        
         currentHealth = HP;
-        healthBar.SetMaxHealth(HP, currentHealth);
-        //GameObject player = GameObject.FindWithTag("Player");
-        //float speed = player.GetComponent<Player>().speed;
-
-
-
-    }
-    private void Update()
-    {
-        
-        //Test function, hit space to take 1 damage
-        if (Input.GetKeyDown(KeyCode.Backslash))
-        {
-            takeDamage(1);
-            healthBar.SetHealth(currentHealth);
-        }
-        
+        if (healthBar != null)
+            healthBar.SetMaxHealth(HP, currentHealth);
     }
 
+    // Keep the same method name so your existing calls still compile.
     public void takeDamage(int damageReceived)
     {
-        currentHealth = currentHealth - damageReceived;
-        healthBar.SetHealth(currentHealth);
+        currentHealth -= damageReceived;
+
+        if (healthBar != null)
+            healthBar.SetHealth(currentHealth);
+
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     private void Die()
     {
+        // If this is a network-spawned object, the SERVER must despawn it.
+        if (_netObj != null && _netObj.IsSpawned && NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+        {
+            _netObj.Despawn(true);
+            return;
+        }
+
+        // Fallback for non-network objects or client-only cases
         Destroy(gameObject);
-        Debug.Log("Unit died.");
-
     }
-
-
-
-
-
 }
