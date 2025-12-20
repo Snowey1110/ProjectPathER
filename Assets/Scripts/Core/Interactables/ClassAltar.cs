@@ -126,4 +126,21 @@ public class ClassAltar : NetworkBehaviour
                 NetworkObject.Despawn(true);
         }
     }
+
+    public bool ServerTryUse(ulong senderClientId)
+    {
+        if (!IsServer) return false;
+
+        if (claimed.Value) return false;
+        if (hp.Value <= 0) return false;
+
+        if (LobbyManager.Instance == null) return false;
+
+        bool ok = LobbyManager.Instance.TrySpawnCharacter(senderClientId, classType);
+        if (!ok) return false;
+
+        claimed.Value = true;
+        return true;
+    }
+
 }

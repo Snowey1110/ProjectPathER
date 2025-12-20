@@ -25,14 +25,10 @@ public class ArcherAttack : BaseAttack
     [ServerRpc(RequireOwnership = false)]
     private void SpawnArrowServerRpc(Vector2 dir, Vector3 spawnPos, ulong shooterId, ServerRpcParams rpcParams = default)
     {
-        // Security: only allow the owner of THIS attack object to shoot
+        // Validate sender == owner
         if (rpcParams.Receive.SenderClientId != OwnerClientId) return;
 
-        if (arrowPrefab == null)
-        {
-            Debug.LogError("[ArcherAttack] Server: arrowPrefab is null.");
-            return;
-        }
+        if (arrowPrefab == null) return;
 
         GameObject arrowGo = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
 
@@ -45,16 +41,13 @@ public class ArcherAttack : BaseAttack
         }
 
         int dmg = 1;
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(shooterId, out var shooterNo))
-        {
-            var st = shooterNo.GetComponent<stats>();
-            if (st != null) dmg = st.baseDamage;
-        }
+        var shooterStats = GetComponent<stats>();
+        if (shooterStats != null) dmg = shooterStats.baseDamage;
 
         arrowNo.Spawn(true);
 
         var arrow = arrowGo.GetComponent<Arrow>();
         if (arrow != null)
-            arrow.ServerInit(dir, arrowSpeed, dmg);
+            arrow.ServerInit(dir, arrowSpeed, dmg, shooterId);
     }
 }
