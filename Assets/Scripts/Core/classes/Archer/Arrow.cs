@@ -6,9 +6,7 @@ using UnityEngine;
 public class Arrow : NetworkBehaviour
 {
     [SerializeField] private float lifetimeSeconds = 3f;
-    [SerializeField] private float spriteAngleOffsetDeg = 0f; // adjust if sprite points “up” by default
-    [SerializeField] private float knockbackImpulse = 6f;
-
+    [SerializeField] private float spriteAngleOffsetDeg = 0f;
 
     private Rigidbody2D rb;
     private Collider2D col;
@@ -21,25 +19,33 @@ public class Arrow : NetworkBehaviour
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
 
-        // Projectiles should generally be triggers to avoid bounces.
+        // For projectiles: use trigger to avoid bounce responses
         if (col != null) col.isTrigger = true;
+
+        // Prevent any physics torque spin
+        if (rb != null) rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     public override void OnNetworkSpawn()
     {
-        // Only server simulates + collides. Clients only render replicated transform.
+        // Clients should not simulate or collide. Also disable this script to prevent any client-side rotation logic.
         if (!IsServer)
         {
             if (rb != null) rb.simulated = false;
             if (col != null) col.enabled = false;
+            enabled = false;
             return;
         }
 
-        if (rb != null) rb.gravityScale = 0f;
+        if (rb != null)
+        {
+            rb.gravityScale = 0f;
+            rb.angularVelocity = 0f;
+        }
+
         Invoke(nameof(ServerDespawn), lifetimeSeconds);
     }
 
-    /// Server-only init. Also ignores collisions with shooter colliders.
     public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId)
     {
         if (!IsServer) return;
@@ -47,13 +53,21 @@ public class Arrow : NetworkBehaviour
         damage = dmg;
         initialized = true;
 
-        // Ignore collisions with shooter so you never hit yourself at spawn.
+        // Disable collider until we're done ignoring shooter collisions
+        if (col != null) col.enabled = false;
+
         IgnoreShooterCollisions(shooterNetworkObjectId);
+
+        // Ensure transforms are up-to-date before enabling collider
+        Physics2D.SyncTransforms();
+
+        if (col != null) col.enabled = true;
 
         dir = dir.sqrMagnitude < 0.0001f ? Vector2.right : dir.normalized;
 
-        if (rb != null)
-            rb.linearVelocity = dir * speed;
+        // Velocity + rotation
+        rb.linearVelocity = dir * speed;
+        rb.angularVelocity = 0f;
 
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + spriteAngleOffsetDeg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
@@ -62,8 +76,8 @@ public class Arrow : NetworkBehaviour
     private void IgnoreShooterCollisions(ulong shooterNetworkObjectId)
     {
         if (col == null) return;
-
         if (NetworkManager.Singleton == null) return;
+
         if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(shooterNetworkObjectId, out var shooterNo))
             return;
 
@@ -82,24 +96,10 @@ public class Arrow : NetworkBehaviour
 
         if (other.CompareTag("Player")) return;
 
-        // Damage
         var s = other.GetComponent<stats>();
         if (s != null)
             s.takeDamage(damage);
 
-        // Knockback 
-        var targetRb = other.attachedRigidbody; // works even if collider is on a child
-        if (targetRb != null)
-        {
-            Vector2 kbDir =
-                (rb != null && rb.linearVelocity.sqrMagnitude > 0.01f)
-                    ? rb.linearVelocity.normalized
-                    : ((Vector2)other.transform.position - (Vector2)transform.position).normalized;
-
-            targetRb.AddForce(kbDir * knockbackImpulse, ForceMode2D.Impulse);
-        }
-
-        // Despawn projectile
         ServerDespawn();
     }
 
