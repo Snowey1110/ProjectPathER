@@ -82,4 +82,18 @@ public class PlayerConnection : NetworkBehaviour
         if (lobbyCamera != null)
             lobbyCamera.gameObject.SetActive(false);
     }
+    private void LateUpdate()
+    {
+        if (!IsOwner) return;
+        if (lobbyCamera == null) return;
+
+        // If we have an owned player object, let PlayerController's camera take over and turn off lobby cam.
+        if (NetworkManager.Singleton != null &&
+            NetworkManager.Singleton.LocalClient != null &&
+            NetworkManager.Singleton.LocalClient.PlayerObject != null)
+        {
+            lobbyCamera.gameObject.SetActive(false);
+        }
+    }
+
 }
