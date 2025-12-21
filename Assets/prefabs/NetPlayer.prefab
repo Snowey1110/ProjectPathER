@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2291626686
+  GlobalObjectIdHash: 1225397102
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -124,10 +124,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b3b362ba9fd78f4f8776a966346c8b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
-  panSpeed: 10
-  controlWithMouse: 1
-  cam: {fileID: 6437016894115552903}
   player: {fileID: 0}
+  panSpeed: 10
+  panBorderThickness: 10
+  panLimit: {x: 0, y: 0}
+  zoomSpeed: 5
+  minZoom: 5
+  maxZoom: 20
+  smoothTime: 0.2
 --- !u!114 &4952673781577957128
 MonoBehaviour:
   m_ObjectHideFlags: 0

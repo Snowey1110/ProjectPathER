@@ -5,12 +5,34 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : NetworkBehaviour
 {
+    public enum PlayerClass
+    {
+        Ghost = 0,
+        Archer = 1,
+        Knight = 2,
+        Mage = 3,
+        Healer = 4
+    }
 
     [Header("Combat")]
     private BaseAttack primaryAttack;
 
+    [Header("Combat Rules")]
+    [SerializeField] private bool defaultFriendlyFire = true;
+
+    // Server-authoritative replicated settings
+    public NetworkVariable<bool> FriendlyFire = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    public NetworkVariable<PlayerClass> Class = new NetworkVariable<PlayerClass>(
+        PlayerClass.Ghost,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
     [Header("References")]
-    [SerializeField] public stats stats; // Your existing stats script
+    [SerializeField] public stats stats;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] public Animator animator;
     [SerializeField] private SpriteRenderer spriteRenderer;
@@ -18,165 +40,170 @@ public class PlayerController : NetworkBehaviour
     [Header("Settings")]
     public float moveSpeed = 5f;
 
-    // --- Input System Variables ---
     private PlayerControls controls;
     private Vector2 moveInput;
     private bool inputActive = true;
 
-    // --- Ability System ---
-    // Dictionary to find abilities by string name ("Dash", "Heal", etc.)
     private Dictionary<string, BaseAbility> abilityMap = new Dictionary<string, BaseAbility>();
+
+    // Cache the local camera for this owned player (do NOT rely on Camera.main)
+    private Camera _localCamera;
 
     public override void OnNetworkSpawn()
     {
-        // If this is NOT my player, disable script so I don't control it
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (IsServer)
+        {
+            // Default friendly fire for this player
+            FriendlyFire.Value = defaultFriendlyFire;
+
+            // Determine class from ClassIdentity if present (Archer/Knight/etc). Otherwise Ghost.
+            PlayerClass resolved = PlayerClass.Ghost;
+            var ident = GetComponent<ClassIdentity>(); // the small script that holds ClassType
+            if (ident != null)
+            {
+                resolved = ident.classType switch
+                {
+                    ClassType.Archer => PlayerClass.Archer,
+                    ClassType.Knight => PlayerClass.Knight,
+                    ClassType.Mage => PlayerClass.Mage,
+                    ClassType.Healer => PlayerClass.Healer,
+                    _ => PlayerClass.Ghost
+                };
+            }
+            Class.Value = resolved;
+        }
+
+        // Always locate the camera under this prefab (if any)
+        _localCamera = GetComponentInChildren<Camera>(true);
+
         if (!IsOwner)
         {
+            // Disable any camera/audio on non-owned player instances
+            DisableLocalOnlyComponentsForRemote();
             enabled = false;
             return;
         }
 
-        // Initialize Components
-        if (rb == null) rb = GetComponent<Rigidbody2D>();
-        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-
-
-
-        CameraController camController = GetComponentInChildren<CameraController>();
-
-        if (camController != null)
-        {
-            camController.player = this.transform;
-            // The CameraController Start() will detach itself automatically!
-        }
-        else
-        {
-            // Fallback: If camera was already detached or in scene
-            GameObject camObj = GameObject.FindWithTag("MainCamera");
-            if (camObj != null)
-                camObj.GetComponent<CameraController>().player = this.transform;
-        }
+        EnableLocalOnlyComponentsForOwner();
 
         primaryAttack = GetComponent<BaseAttack>();
 
-        // Setup Systems
         InitializeAbilities();
         SetupInput();
+    }
+
+    private void DisableLocalOnlyComponentsForRemote()
+    {
+        // Disable any camera(s) in this prefab instance
+        foreach (var cam in GetComponentsInChildren<Camera>(true))
+        {
+            cam.enabled = false;
+            if (cam.CompareTag("MainCamera"))
+                cam.tag = "Untagged";
+        }
+
+        // Disable AudioListener if present
+        foreach (var al in GetComponentsInChildren<AudioListener>(true))
+            al.enabled = false;
+
+        // Disable the camera controller script so it doesn’t move the camera
+        var camController = GetComponentInChildren<CameraController>(true);
+        if (camController != null) camController.enabled = false;
+    }
+
+    private void EnableLocalOnlyComponentsForOwner()
+    {
+        // Ensure ONLY the owning player's camera becomes MainCamera
+        if (_localCamera != null)
+        {
+            _localCamera.enabled = true;
+            _localCamera.tag = "MainCamera";
+
+            var camController = _localCamera.GetComponent<CameraController>();
+            if (camController != null)
+            {
+                camController.enabled = true;
+                camController.player = transform;
+            }
+        }
     }
 
     private void SetupInput()
     {
         controls = new PlayerControls();
 
-        // Movement
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+        controls.Player.Move.canceled += _ => moveInput = Vector2.zero;
 
-        // Abilities
-        controls.Player.Ability1.performed += ctx => UseAbility("Dash", 1);
-
-        // ATTACK (Left Click)
-        controls.Player.Attack.performed += ctx => PerformAttack();
+        controls.Player.Ability1.performed += _ => UseAbility("Dash", 1);
+        controls.Player.Attack.performed += _ => PerformAttack();
 
         if (inputActive) controls.Player.Enable();
     }
 
     private void PerformAttack()
     {
-        // Safety Check: Does this hero actually have an attack script?
-        if (primaryAttack != null)
-        {
-            // Calculate Aim Direction (Mouse Position)
-            // (We handle the null camera check inside the attack script or here)
-            if (Camera.main == null) return;
+        if (primaryAttack == null) return;
 
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            Vector2 direction = (mousePos - (Vector2)transform.position).normalized;
+        // Use the owner's camera, not Camera.main
+        if (_localCamera == null) return;
 
-            // Fire the Primary Attack
-            primaryAttack.Fire(direction);
+        Vector2 mousePos = _localCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector2 direction = (mousePos - (Vector2)transform.position).normalized;
 
-            // Animation (Later move this inside the specific Attack script)
-            if (animator != null) animator.SetTrigger("attack");
-        }
+        primaryAttack.Fire(direction);
+
+        if (animator != null) animator.SetTrigger("attack");
     }
 
     private void InitializeAbilities()
     {
-        // Finds all ability scripts (DashAbility, etc.) attached to this object
         BaseAbility[] abilities = GetComponents<BaseAbility>();
-
         foreach (var ability in abilities)
         {
             if (!abilityMap.ContainsKey(ability.abilityName))
-            {
                 abilityMap.Add(ability.abilityName, ability);
-                // Debug.Log($"Ability Registered: {ability.abilityName}");
-            }
         }
     }
 
-    // --- THE BRAIN: CALLING ABILITIES ---
     public void UseAbility(string name, int level)
     {
         if (!inputActive) return;
 
-        // Check if we have this ability attached
         if (abilityMap.TryGetValue(name, out BaseAbility ability))
-        {
             ability.Activate(this.gameObject, level);
-        }
         else
-        {
             Debug.LogWarning($"Ability '{name}' not found on Player!");
-        }
     }
 
-    // --- MAIN LOOP ---
     void Update()
     {
         if (!IsOwner) return;
 
-        // Handle Animations
         bool isWalking = moveInput.magnitude > 0;
-        animator.SetBool("walking", isWalking);
+        if (animator != null) animator.SetBool("walking", isWalking);
 
-        // Handle Rotation (Flipping)
-        // Only flip if we are NOT attacking (prevents moonwalking while shooting)
-        if (!animator.GetBool("attack"))
-        {
+        if (animator != null && !animator.GetBool("attack"))
             HandleRotation();
-        }
     }
 
     void FixedUpdate()
     {
-        // Physics movement belongs in FixedUpdate for smooth networking
-        if (IsOwner && inputActive)
-        {
+        if (IsOwner && inputActive && rb != null)
             rb.linearVelocity = moveInput * moveSpeed;
-        }
     }
 
     void HandleRotation()
     {
-        // SAFETY CHECK: If no camera exists, stop immediately to prevent crash
-        if (Camera.main == null) return;
+        if (_localCamera == null || spriteRenderer == null) return;
 
-        // Use Mouse Position for aiming direction
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-
-        if (mousePos.x < transform.position.x)
-        {
-            spriteRenderer.flipX = true; // Face Left
-        }
-        else
-        {
-            spriteRenderer.flipX = false; // Face Right
-        }
+        Vector2 mousePos = _localCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        spriteRenderer.flipX = mousePos.x < transform.position.x;
     }
 
-    // --- UTILITIES ---
     public void SetInputActive(bool active)
     {
         inputActive = active;
@@ -184,21 +211,25 @@ public class PlayerController : NetworkBehaviour
         if (controls == null) return;
 
         if (active)
-        {
             controls.Player.Enable();
-        }
         else
         {
             controls.Player.Disable();
-            // Stop moving immediately when menu opens
             if (rb != null) rb.linearVelocity = Vector2.zero;
             moveInput = Vector2.zero;
-            animator.SetBool("walking", false);
+            if (animator != null) animator.SetBool("walking", false);
         }
     }
 
     public override void OnNetworkDespawn()
     {
         if (controls != null) controls.Disable();
+    }
+
+    // TEST: Server RPC to set friendly fire
+    [ServerRpc(RequireOwnership = true)]
+    public void SetFriendlyFireServerRpc(bool v)
+    {
+        FriendlyFire.Value = v;
     }
 }
