@@ -255,7 +255,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClassAltar
   ShowTopMostFoldoutHeaderGroup: 1
-  classType: 0
+  classType: 1
   maxHp: 100
   regenDelaySeconds: 5
   regenPerSecond: 5
@@ -27258,6 +27258,9 @@ MonoBehaviour:
   minimumSpawnDistance: 40
   spawnInterval: 3
   spawnCount: 2
+  startAsDayTime: 1
+  spawnImmediatelyOnNight: 1
+  toggleKey: 287
 --- !u!4 &2060236181
 Transform:
   m_ObjectHideFlags: 0
