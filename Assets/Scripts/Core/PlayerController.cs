@@ -5,8 +5,31 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : NetworkBehaviour
 {
+    public enum PlayerClass
+    {
+        Ghost = 0,
+        Archer = 1,
+        Knight = 2,
+        Mage = 3,
+        Healer = 4
+    }
+
     [Header("Combat")]
     private BaseAttack primaryAttack;
+
+    [Header("Combat Rules")]
+    [SerializeField] private bool defaultFriendlyFire = true;
+
+    // Server-authoritative replicated settings
+    public NetworkVariable<bool> FriendlyFire = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    public NetworkVariable<PlayerClass> Class = new NetworkVariable<PlayerClass>(
+        PlayerClass.Ghost,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
 
     [Header("References")]
     [SerializeField] public stats stats;
@@ -30,6 +53,28 @@ public class PlayerController : NetworkBehaviour
     {
         if (rb == null) rb = GetComponent<Rigidbody2D>();
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (IsServer)
+        {
+            // Default friendly fire for this player
+            FriendlyFire.Value = defaultFriendlyFire;
+
+            // Determine class from ClassIdentity if present (Archer/Knight/etc). Otherwise Ghost.
+            PlayerClass resolved = PlayerClass.Ghost;
+            var ident = GetComponent<ClassIdentity>(); // the small script that holds ClassType
+            if (ident != null)
+            {
+                resolved = ident.classType switch
+                {
+                    ClassType.Archer => PlayerClass.Archer,
+                    ClassType.Knight => PlayerClass.Knight,
+                    ClassType.Mage => PlayerClass.Mage,
+                    ClassType.Healer => PlayerClass.Healer,
+                    _ => PlayerClass.Ghost
+                };
+            }
+            Class.Value = resolved;
+        }
 
         // Always locate the camera under this prefab (if any)
         _localCamera = GetComponentInChildren<Camera>(true);
@@ -179,5 +224,12 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         if (controls != null) controls.Disable();
+    }
+
+    // TEST: Server RPC to set friendly fire
+    [ServerRpc(RequireOwnership = true)]
+    public void SetFriendlyFireServerRpc(bool v)
+    {
+        FriendlyFire.Value = v;
     }
 }

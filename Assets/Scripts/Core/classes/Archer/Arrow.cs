@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using static PlayerController;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
@@ -13,22 +14,23 @@ public class Arrow : NetworkBehaviour
 
     private int damage;
     private bool initialized;
+    private bool friendlyFire;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
 
-        // For projectiles: use trigger to avoid bounce responses
+        // Make projectile pass-through and avoid physics bounce
         if (col != null) col.isTrigger = true;
 
-        // Prevent any physics torque spin
+        // Prevent solver torque spin
         if (rb != null) rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     public override void OnNetworkSpawn()
     {
-        // Clients should not simulate or collide. Also disable this script to prevent any client-side rotation logic.
+        // Only server simulates + collides
         if (!IsServer)
         {
             if (rb != null) rb.simulated = false;
@@ -46,26 +48,24 @@ public class Arrow : NetworkBehaviour
         Invoke(nameof(ServerDespawn), lifetimeSeconds);
     }
 
-    public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId)
+    public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId, bool shooterFriendlyFire)
     {
         if (!IsServer) return;
 
         damage = dmg;
         initialized = true;
+        friendlyFire = shooterFriendlyFire;
 
-        // Disable collider until we're done ignoring shooter collisions
+        // Temporarily disable collider while setting ignore rules to avoid immediate self-hit at spawn
         if (col != null) col.enabled = false;
 
         IgnoreShooterCollisions(shooterNetworkObjectId);
 
-        // Ensure transforms are up-to-date before enabling collider
         Physics2D.SyncTransforms();
-
         if (col != null) col.enabled = true;
 
         dir = dir.sqrMagnitude < 0.0001f ? Vector2.right : dir.normalized;
 
-        // Velocity + rotation
         rb.linearVelocity = dir * speed;
         rb.angularVelocity = 0f;
 
@@ -81,8 +81,7 @@ public class Arrow : NetworkBehaviour
         if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(shooterNetworkObjectId, out var shooterNo))
             return;
 
-        var shooterCols = shooterNo.GetComponentsInChildren<Collider2D>(true);
-        foreach (var sc in shooterCols)
+        foreach (var sc in shooterNo.GetComponentsInChildren<Collider2D>(true))
         {
             if (sc == null) continue;
             Physics2D.IgnoreCollision(col, sc, true);
@@ -94,13 +93,40 @@ public class Arrow : NetworkBehaviour
         if (!IsServer || !initialized) return;
         if (other == null) return;
 
-        if (other.CompareTag("Player")) return;
+        // --- Player filtering rules ---
+        var targetPC = other.GetComponentInParent<PlayerController>();
+        if (targetPC != null)
+        {
+            // Ghost is never hittable
+            if (targetPC.Class.Value == PlayerClass.Ghost) return;
 
+            // Always ignore Archer class
+            if (targetPC.Class.Value == PlayerClass.Archer) return;
+
+            // Friendly fire OFF: ignore other player classes
+            if (!friendlyFire) return;
+
+            // Friendly fire ON: hit Knight/Mage/Healer
+            var targetStats = targetPC.GetComponent<stats>();
+            if (targetStats != null)
+                targetStats.takeDamage(damage);
+
+            ServerDespawn();
+            return;
+        }
+
+        // --- Non-player targets (monsters, props) ---
         var s = other.GetComponent<stats>();
         if (s != null)
+        {
             s.takeDamage(damage);
-
-        ServerDespawn();
+            ServerDespawn();
+        }
+        else
+        {
+            // Despawn on walls etc.
+            ServerDespawn();
+        }
     }
 
     private void ServerDespawn()

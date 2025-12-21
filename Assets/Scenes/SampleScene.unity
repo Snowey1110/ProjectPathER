@@ -27253,7 +27253,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  slimePrefab: {fileID: -975814854044699623, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+  slimePrefab: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
   spawnRadius: 50
   minimumSpawnDistance: 40
   spawnInterval: 3
@@ -27518,6 +27518,10 @@ PrefabInstance:
       value: Slime
       objectReference: {fileID: 0}
     - target: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072808807572519412, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: m_TagString
       value: Enemy
       objectReference: {fileID: 0}
@@ -27563,11 +27567,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8031373583389038882, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8031373583389038882, guid: b63253f842341dd44940794c4f2415e4, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
