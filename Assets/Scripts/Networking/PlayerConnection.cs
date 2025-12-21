@@ -78,9 +78,8 @@ public class PlayerConnection : NetworkBehaviour
             return;
         }
 
-        // Success: lobby camera will typically be replaced by the spawned character’s camera.
+        // Success: lobby camera will typically be replaced by the spawned characterï¿½s camera.
         if (lobbyCamera != null)
             lobbyCamera.gameObject.SetActive(false);
     }
-
 }
