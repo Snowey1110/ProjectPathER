@@ -919,7 +919,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
   ShowTopMostFoldoutHeaderGroup: 1
   archerPrefab: {fileID: 8616637710575777061, guid: a5ea50d4b4cc3e24bb5b45475a3810f4, type: 3}
-  knightPrefab: {fileID: 8616637710575777061, guid: 3685582d490a8a04bb10dd60dddb548c, type: 3}
+  knightPrefab: {fileID: 8616637710575777061, guid: cc337911545f3de47a9ca84ca68e490b, type: 3}
   magePrefab: {fileID: 0}
   healerPrefab: {fileID: 0}
   spawnPoints: []
