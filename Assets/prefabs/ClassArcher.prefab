@@ -516,6 +516,7 @@ GameObject:
   - component: {fileID: 505532009114708831}
   - component: {fileID: 8895147916229528259}
   - component: {fileID: 1590073603261474537}
+  - component: {fileID: 1238352054297935531}
   m_Layer: 3
   m_Name: ClassArcher
   m_TagString: Player
@@ -637,6 +638,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  defaultFriendlyFire: 1
+  FriendlyFire:
+    m_InternalValue: 0
+  Class:
+    m_InternalValue: 0
   stats: {fileID: 5534538148860239083}
   rb: {fileID: 0}
   animator: {fileID: 5161156361555879160}
@@ -663,7 +669,6 @@ MonoBehaviour:
   level: 0
   abilityPoints: 11
   skillPoints: 2
-  allowCombat: 1
 --- !u!95 &5161156361555879160
 Animator:
   serializedVersion: 7
@@ -857,5 +862,18 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   attackRate: 0.5
   arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
-  arrowForce: 20
-  spawnOffset: 1.5
+  arrowSpeed: 20
+  extraSpawnPadding: 0.2
+--- !u!114 &1238352054297935531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616637710575777061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f510d73f1449024e8b7666d29785838, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClassIdentity
+  classType: 0
