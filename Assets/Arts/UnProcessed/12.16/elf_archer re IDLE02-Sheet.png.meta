@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: d276172417859104c9ada7deed1d1b50
+guid: b6248fb4a3fe60047a06f41e37f4b6ad
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8975267000895143967
-    second: elf_archer re idle-Sheet_0
+      213: -4149339410739327666
+    second: elf_archer re IDLE02-Sheet_0
   - first:
-      213: 16592208978743803
-    second: elf_archer re idle-Sheet_1
+      213: -5719425087343148106
+    second: elf_archer re IDLE02-Sheet_1
   - first:
-      213: 4871823787680456496
-    second: elf_archer re idle-Sheet_2
+      213: 861030230849526684
+    second: elf_archer re IDLE02-Sheet_2
   - first:
-      213: 2425249829339254125
-    second: elf_archer re idle-Sheet_3
+      213: 4937873785502643621
+    second: elf_archer re IDLE02-Sheet_3
   - first:
-      213: 7516113885043997994
-    second: elf_archer re idle-Sheet_4
+      213: 6135769384829609932
+    second: elf_archer re IDLE02-Sheet_4
   - first:
-      213: -7655916633606644969
-    second: elf_archer re idle-Sheet_5
+      213: 5385850519013943706
+    second: elf_archer re IDLE02-Sheet_5
   - first:
-      213: 6082441519448775624
-    second: elf_archer re idle-Sheet_6
+      213: -2251499211927502740
+    second: elf_archer re IDLE02-Sheet_6
   - first:
-      213: -3714223317437751310
-    second: elf_archer re idle-Sheet_7
+      213: -5745843151572565602
+    second: elf_archer re IDLE02-Sheet_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -121,13 +121,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_0
+      name: elf_archer re IDLE02-Sheet_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 14
-        width: 23
-        height: 36
+        x: 209
+        y: 149
+        width: 212
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -136,20 +136,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f1004a8c8cd8e8c70800000000000000
-      internalID: 8975267000895143967
+      spriteID: e4d8a524ac59a66c0800000000000000
+      internalID: -4149339410739327666
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_1
+      name: elf_archer re IDLE02-Sheet_1
       rect:
         serializedVersion: 2
-        x: 84
-        y: 14
-        width: 23
-        height: 36
+        x: 849
+        y: 149
+        width: 212
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -158,20 +158,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf19732b682fa3000800000000000000
-      internalID: 16592208978743803
+      spriteID: 6b344759f2580a0b0800000000000000
+      internalID: -5719425087343148106
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_2
+      name: elf_archer re IDLE02-Sheet_2
       rect:
         serializedVersion: 2
-        x: 148
-        y: 14
-        width: 23
-        height: 36
+        x: 1489
+        y: 149
+        width: 212
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -180,20 +180,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 03fddf04ce13c9340800000000000000
-      internalID: 4871823787680456496
+      spriteID: c9b98aade6ef2fb00800000000000000
+      internalID: 861030230849526684
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_3
+      name: elf_archer re IDLE02-Sheet_3
       rect:
         serializedVersion: 2
-        x: 211
-        y: 14
-        width: 25
-        height: 35
+        x: 2119
+        y: 149
+        width: 232
+        height: 332
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -202,20 +202,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d6dc759ced738a120800000000000000
-      internalID: 2425249829339254125
+      spriteID: 5a53992cb0ad68440800000000000000
+      internalID: 4937873785502643621
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_4
+      name: elf_archer re IDLE02-Sheet_4
       rect:
         serializedVersion: 2
-        x: 276
-        y: 14
-        width: 23
-        height: 35
+        x: 2769
+        y: 149
+        width: 212
+        height: 332
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -224,20 +224,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a2dbd61a1c99e4860800000000000000
-      internalID: 7516113885043997994
+      spriteID: cc76c7e2fb1a62550800000000000000
+      internalID: 6135769384829609932
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_5
+      name: elf_archer re IDLE02-Sheet_5
       rect:
         serializedVersion: 2
-        x: 340
-        y: 14
-        width: 23
-        height: 35
+        x: 3409
+        y: 149
+        width: 212
+        height: 332
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -246,20 +246,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 71b1fdf6268b0c590800000000000000
-      internalID: -7655916633606644969
+      spriteID: a99ed27f2826eba40800000000000000
+      internalID: 5385850519013943706
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_6
+      name: elf_archer re IDLE02-Sheet_6
       rect:
         serializedVersion: 2
-        x: 405
-        y: 14
-        width: 21
-        height: 35
+        x: 4059
+        y: 149
+        width: 192
+        height: 332
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -268,20 +268,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8cbd4d5f55c296450800000000000000
-      internalID: 6082441519448775624
+      spriteID: c604dfc456111c0e0800000000000000
+      internalID: -2251499211927502740
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: elf_archer re idle-Sheet_7
+      name: elf_archer re IDLE02-Sheet_7
       rect:
         serializedVersion: 2
-        x: 469
-        y: 14
-        width: 21
-        height: 36
+        x: 4699
+        y: 149
+        width: 192
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -290,8 +290,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2ff56a3529d647cc0800000000000000
-      internalID: -3714223317437751310
+      spriteID: e91086fa81aa240b0800000000000000
+      internalID: -5745843151572565602
       vertices: []
       indices: 
       edges: []
@@ -310,14 +310,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      elf_archer re idle-Sheet_0: 8975267000895143967
-      elf_archer re idle-Sheet_1: 16592208978743803
-      elf_archer re idle-Sheet_2: 4871823787680456496
-      elf_archer re idle-Sheet_3: 2425249829339254125
-      elf_archer re idle-Sheet_4: 7516113885043997994
-      elf_archer re idle-Sheet_5: -7655916633606644969
-      elf_archer re idle-Sheet_6: 6082441519448775624
-      elf_archer re idle-Sheet_7: -3714223317437751310
+      elf_archer re IDLE02-Sheet_0: -4149339410739327666
+      elf_archer re IDLE02-Sheet_1: -5719425087343148106
+      elf_archer re IDLE02-Sheet_2: 861030230849526684
+      elf_archer re IDLE02-Sheet_3: 4937873785502643621
+      elf_archer re IDLE02-Sheet_4: 6135769384829609932
+      elf_archer re IDLE02-Sheet_5: 5385850519013943706
+      elf_archer re IDLE02-Sheet_6: -2251499211927502740
+      elf_archer re IDLE02-Sheet_7: -5745843151572565602
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
