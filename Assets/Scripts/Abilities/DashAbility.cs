@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class DashAbility : BaseAbility
 {
-    public int currentLevel = 1;
+    public int dashLevel;
     private bool isDashing = false;
     private Rigidbody2D rb;
 

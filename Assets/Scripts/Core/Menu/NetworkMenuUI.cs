@@ -1,44 +1,104 @@
 using UnityEngine;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UTP; // For IP Address
-using TMPro; // For Input Field
+using Netcode.Transports.Facepunch; // Swapped UTP for Facepunch
+using Steamworks; // Added Steamworks
+using TMPro;
 using UnityEngine.SceneManagement;
 
 public class NetworkMenuUI : MonoBehaviour
 {
     [Header("UI References")]
-    public TMP_InputField ipInputField;
-    private void Start()
-    {
-        // Hide the input field when the game starts
-        if (ipInputField != null)
-            ipInputField.gameObject.SetActive(false);
+    public TMP_InputField steamIdInputField; // Renamed for clarity
+    public GameObject uiVisuals; // Drag your entire Menu Canvas/Panel here
 
-        // Listen for the "Enter" key specifically on this input field
-        // When user hits Enter, we pass the text to our connection logic
-        if (ipInputField != null)
-            ipInputField.onSubmit.AddListener(OnInputSubmit);
+    // Singleton check to prevent duplicates if you return to menu
+    private static NetworkMenuUI instance;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject); // Keeps Steam alive during the game
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
-    // Link this to your "Multiplayer/Join" Button
+    private void Start()
+    {
+        // Initialize Steam Client
+        if (!SteamClient.IsValid)
+        {
+            try
+            {
+                SteamClient.Init(480);
+                Debug.Log($"Steam Initialized: {SteamClient.Name}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("Steam Failed to Init: " + e.Message);
+            }
+        }
+
+        // Hide the input field initially
+        if (steamIdInputField != null)
+            steamIdInputField.gameObject.SetActive(false);
+
+        // Listen for "Enter" key
+        if (steamIdInputField != null)
+            steamIdInputField.onSubmit.AddListener(OnInputSubmit);
+
+        // Listen for Scene Changes so we can hide/show the menu
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void Update()
+    {
+        // Run Steam Callbacks every frame
+        SteamClient.RunCallbacks();
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnApplicationQuit()
+    {
+        // This runs only when the game executable actually closes.
+
+        // Shutdown Netcode FIRST
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+
+        // Shutdown Steam SECOND
+        // This gives the Transport time to clean up its sockets before we kill the Steam Client.
+        SteamClient.Shutdown();
+    }
+
+
+    // --- BUTTON LOGIC ---
+
     public void OnMultiplayerButtonClicked()
     {
-        // Check: Is the input field currently visible?
-        if (ipInputField.gameObject.activeSelf)
+        if (steamIdInputField.gameObject.activeSelf)
         {
             AttemptConnection();
         }
         else
         {
-            // Show it!
-            ipInputField.gameObject.SetActive(true);
-
-            ipInputField.Select();
-            ipInputField.ActivateInputField();
+            steamIdInputField.gameObject.SetActive(true);
+            steamIdInputField.Select();
+            steamIdInputField.ActivateInputField();
         }
     }
 
-    // Called automatically when user presses "Enter" while typing
     private void OnInputSubmit(string text)
     {
         AttemptConnection();
@@ -46,37 +106,61 @@ public class NetworkMenuUI : MonoBehaviour
 
     private void AttemptConnection()
     {
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        string ipText = ipInputField.text;
+        // Logic: Parse Steam ID instead of IP
+        string idText = steamIdInputField.text;
 
-        // Logic: If empty -> Use Localhost. If filled -> Use Input.
-        if (string.IsNullOrEmpty(ipText))
+        if (ulong.TryParse(idText, out ulong friendId))
         {
-            transport.ConnectionData.Address = "0.0.0.0";
-            Debug.Log("Connecting to Localhost...");
+            Debug.Log($"Connecting to Steam ID: {friendId}...");
+
+            // Set the Facepunch Transport Target
+            var transport = NetworkManager.Singleton.GetComponent<FacepunchTransport>();
+            transport.targetSteamId = friendId;
+
+            // Start Client
+            NetworkManager.Singleton.StartClient();
+
+            // Hide Input
+            steamIdInputField.gameObject.SetActive(false);
         }
         else
         {
-            transport.ConnectionData.Address = ipText;
-            Debug.Log($"Connecting to {ipText}...");
+            Debug.LogError("Invalid Steam ID! Copy it from your friend's console.");
         }
-
-        // Connect!
-        NetworkManager.Singleton.StartClient();
-
-        // Hide the input again after clicking
-        ipInputField.gameObject.SetActive(false);
     }
 
-    // Link this to "Start Host" button
     public void OnStartHostClicked()
     {
+        Debug.Log("Starting Host via Steam...");
+
+        // Facepunch handles the "Target ID" automatically for hosts (it uses your own)
+        var transport = NetworkManager.Singleton.GetComponent<FacepunchTransport>();
+        transport.targetSteamId = SteamClient.SteamId;
+
         NetworkManager.Singleton.StartHost();
-        NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
     }
 
     public void OnQuitClicked()
     {
         Application.Quit();
+    }
+
+    // --- HELPER TO HIDE UI IN GAME ---
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (uiVisuals == null) return;
+
+        if (scene.name == "SampleScene") // Change this to your Game Scene name
+        {
+            uiVisuals.SetActive(false); // Hide Menu when playing
+        }
+        else
+        {
+            uiVisuals.SetActive(true); // Show Menu when in menu scene
+            // Unlock mouse cursor when returning to menu
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 }

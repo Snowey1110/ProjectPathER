@@ -4,85 +4,82 @@ using Unity.Netcode;
 public class PlayerConnection : NetworkBehaviour
 {
     [SerializeField] private Camera lobbyCamera;
+    private bool _requestedSpawn;
 
-    public override void OnNetworkSpawn()
+    private void Start()
     {
-        // Only the owner (you) should use this camera.
-        // Disable it for other players so you don't see through their eyes.
-        if (IsOwner)
-        {
-            // Turn on MY camera and listener
-            lobbyCamera.enabled = true;
-
-            // If the listener is on the same object as the camera:
-            if (lobbyCamera.TryGetComponent(out AudioListener listener))
-            {
-                listener.enabled = true;
-            }
-
-            // Also ensure the GameObject is active (if its disabled the whole object)
-            lobbyCamera.gameObject.SetActive(true);
-        }
-        else
-        {
-            // No, this belongs to someone else.
-            // Ensure their camera stays OFF so I don't see through their eyes.
+        if (!IsOwner && lobbyCamera != null)
             lobbyCamera.gameObject.SetActive(false);
-        }
     }
 
     private void Update()
     {
-        if (!IsOwner) return;
+        if (!IsOwner || _requestedSpawn) return;
+        if (lobbyCamera == null || !lobbyCamera.gameObject.activeInHierarchy) return;
 
         if (Input.GetMouseButtonDown(0))
         {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 world = lobbyCamera.ScreenToWorldPoint(Input.mousePosition);
+            world.z = 0f;
 
-            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+            RaycastHit2D hit = Physics2D.Raycast(world, Vector2.zero);
+            if (hit.collider == null) return;
 
-            if (hit.collider != null)
+            if (!hit.collider.TryGetComponent(out ClassAltar altar)) return;
+
+            // IMPORTANT: require NetworkObject so server can locate it
+            NetworkObject altarNo = altar.GetComponent<NetworkObject>();
+            if (altarNo == null)
             {
-                Debug.Log("I hit: " + hit.collider.name);
+                Debug.LogError("[PlayerConnection] ClassAltar is missing NetworkObject.");
+                return;
+            }
 
-                if (hit.transform.TryGetComponent(out ClassAltar altar))
-                {
-                    Debug.Log($"Found Altar! Requesting: {altar.classType}");
-                    RequestSpawnServerRpc(altar.classType);
-                }
-                else
-                {
-                    Debug.Log("I hit something, but it is NOT an Altar.");
-                }
-            }
-            else
-            {
-                Debug.Log("I clicked, but the Raycast missed everything.");
-            }
+            Debug.Log($"Found Altar! Requesting: {altar.classType}");
+
+            _requestedSpawn = true;
+            TryUseAltarServerRpc(altarNo.NetworkObjectId);
         }
     }
 
-    [ServerRpc]
-    private void RequestSpawnServerRpc(ClassType classType)
+    [ServerRpc(RequireOwnership = true)]
+    private void TryUseAltarServerRpc(ulong altarNetworkObjectId, ServerRpcParams rpcParams = default)
     {
-        // Ask the Game Manager: "Is this class available?"
-        if (LobbyManager.Instance.IsClassAvailable(classType))
-        {
-            // Spawn the Character
-            LobbyManager.Instance.SpawnCharacter(OwnerClientId, classType);
+        ulong senderId = rpcParams.Receive.SenderClientId;
 
-            // Tell the Client to disable their Lobby Camera (so Game Camera takes over)
-            DisableLobbyCameraClientRpc();
-        }
-        else
+        bool success = false;
+
+        if (NetworkManager.Singleton != null &&
+            NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(altarNetworkObjectId, out var altarNo))
         {
-            Debug.Log("Class is already taken!");
+            var altar = altarNo.GetComponent<ClassAltar>();
+            if (altar != null)
+            {
+                success = altar.ServerTryUse(senderId);
+            }
         }
+
+        // Respond only to the requesting client
+        var sendParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } }
+        };
+
+        OnUseAltarResultClientRpc(success, sendParams);
     }
 
     [ClientRpc]
-    private void DisableLobbyCameraClientRpc()
+    private void OnUseAltarResultClientRpc(bool success, ClientRpcParams rpcParams = default)
     {
-        lobbyCamera.gameObject.SetActive(false);
+        if (!success)
+        {
+            // Allow clicking other altars
+            _requestedSpawn = false;
+            return;
+        }
+
+        // Success: lobby camera will typically be replaced by the spawned character�s camera.
+        if (lobbyCamera != null)
+            lobbyCamera.gameObject.SetActive(false);
     }
 }
