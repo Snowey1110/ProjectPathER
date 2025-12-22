@@ -28,6 +28,9 @@ public class Slime : NetworkBehaviour
     private float _moveSpeed;
     private bool _wantsMove;
 
+    private Vector2 _desiredVelocity;
+    private bool _hasTarget;
+
     public override void OnNetworkSpawn()
     {
         animator = GetComponent<Animator>();
@@ -49,11 +52,14 @@ public class Slime : NetworkBehaviour
         {
             retargetTimer = retargetInterval;
             RetargetClosestPlayer();
-            if (targetPlayer == null)
-            {
-                _wantsMove = false;
-                return;
-            }
+        }
+
+        _hasTarget = (targetPlayer != null);
+
+        if (!_hasTarget)
+        {
+            _desiredVelocity = Vector2.zero;
+            return;
         }
 
         float dist = Vector2.Distance(transform.position, targetPlayer.position);
@@ -65,37 +71,33 @@ public class Slime : NetworkBehaviour
 
         if (dist < detectionRange)
         {
-            _moveSpeed = jumping ? jumpCrawlSpeed : crawlSpeed;
-            _moveDir = ((Vector2)targetPlayer.position - (Vector2)transform.position).normalized;
-            _wantsMove = !jumping || jumping; // keep moving either way
+            Vector2 dir = ((Vector2)targetPlayer.position - (Vector2)transform.position).normalized;
+            float speed = jumping ? jumpCrawlSpeed : crawlSpeed;
+            _desiredVelocity = dir * speed;
 
-            // Flip on server (replicated visually enough for now)
             if (spriteRenderer != null)
             {
-                if (_moveDir.x > 0) spriteRenderer.flipX = false;
-                else if (_moveDir.x < 0) spriteRenderer.flipX = true;
+                if (dir.x > 0) spriteRenderer.flipX = false;
+                else if (dir.x < 0) spriteRenderer.flipX = true;
             }
         }
         else
         {
-            _wantsMove = false;
+            _desiredVelocity = Vector2.zero;
         }
     }
+
+
 
     private void FixedUpdate()
     {
         if (!IsServer) return;
         if (rb == null) return;
 
-        if (!_wantsMove)
-        {
-            rb.linearVelocity = Vector2.zero;
-            return;
-        }
-
-        // Drive physics motion on server so NetworkRigidbody2D/NetworkTransform can replicate cleanly.
-        rb.linearVelocity = _moveDir * _moveSpeed;
+        // Drive physics on server so NetworkRigidbody2D can replicate motion to clients.
+        rb.linearVelocity = _desiredVelocity;
     }
+
 
     private void RetargetClosestPlayer()
     {
