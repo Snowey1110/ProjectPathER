@@ -30,11 +30,29 @@ public class Slime : NetworkBehaviour
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // Only the server runs AI + applies damage.
-        if (!IsServer)
-            return;
+        // Cache collider so we can disable it on clients (optional but recommended)
+        var col = GetComponent<Collider2D>();
 
+        // Only the server simulates AI + physics for slimes.
+        if (!IsServer)
+        {
+            // Prevent client-side physics from overriding NetworkTransform updates.
+            if (rb != null) rb.simulated = false;
+
+            // Server is authoritative for hits; disable client collision callbacks.
+            if (col != null) col.enabled = false;
+
+            return;
+        }
+
+        // Server: keep physics on
+        if (rb != null)
+        {
+            rb.gravityScale = 0f;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
     }
+
 
     private void Update()
     {
@@ -98,18 +116,24 @@ public class Slime : NetworkBehaviour
 
     private void MoveToward(Transform player, float speed)
     {
-        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        if (rb == null) return;
 
-        // Server-authoritative movement.
-        transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
+        Vector2 from = rb.position;
+        Vector2 to = (Vector2)player.position;
+        Vector2 dir = (to - from).sqrMagnitude < 0.0001f ? Vector2.zero : (to - from).normalized;
 
-        // Flip (server drives; clients see via animator/sprite state if you replicate, otherwise acceptable as cosmetic)
+        // Server-authoritative physics movement (plays nicely with NetworkRigidbody2D/NetworkTransform)
+        Vector2 newPos = Vector2.MoveTowards(from, to, speed * Time.deltaTime);
+        rb.MovePosition(newPos);
+
+        // Flip sprite (server-driven; replicated visually through transform updates)
         if (spriteRenderer != null)
         {
             if (dir.x > 0) spriteRenderer.flipX = false;
             else if (dir.x < 0) spriteRenderer.flipX = true;
         }
     }
+
 
     private void StartJump()
     {
