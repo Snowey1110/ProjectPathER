@@ -5,79 +5,93 @@ using UnityEngine.InputSystem;
 public class BowAim2D : NetworkBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform bowTransform;          // usually this.transform
-    [SerializeField] private Transform playerRoot;            // the player (ClassArcher root)
-    [SerializeField] private Camera ownerCamera;              // if null we find in PlayerController
-    [SerializeField] private SpriteRenderer bodySprite;       // for flip logic (optional)
+    [SerializeField] private Transform center;
+    [SerializeField] private Camera ownerCamera;
 
-    [Header("Net")]
+    [Header("Orbit")]
+    [SerializeField] private float radius = 0.45f;
+    [SerializeField] private Vector2 localOffset = Vector2.zero;
+
+    [Header("Sprite / Art Alignment")]
+    [Tooltip("Your bow art points down by default.")]
+    [SerializeField] private float spriteAimOffsetDeg = -45f;
+
+    [Header("Flip")]
+    [Tooltip("Flip horizontally when aiming left (x < 0).")]
+    [SerializeField] private bool flipWhenAimingLeft = true;
+
+    [Tooltip("If your bow looks mirrored the wrong way, invert this.")]
+    [SerializeField] private bool invertFlip = false;
+
+    [Header("Networking")]
     [SerializeField] private float sendRateHz = 20f;
 
     private readonly NetworkVariable<float> aimAngleDeg = new NetworkVariable<float>(
-        0f,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server);
+        0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private float sendTimer;
 
     private void Awake()
     {
-        if (bowTransform == null) bowTransform = transform;
-        if (playerRoot == null) playerRoot = transform.root;
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        // Remote clients only need to render from replicated aimAngleDeg.
-        // Owner will send updates.
+        if (center == null) center = transform.root;
     }
 
     private void Update()
     {
-        if (!IsSpawned) return;
+        if (center == null) return;
 
         if (IsOwner)
         {
-            // Find owner camera if not assigned
             if (ownerCamera == null)
                 ownerCamera = GetComponentInParent<PlayerController>()?.GetComponentInChildren<Camera>(true);
 
-            if (ownerCamera == null || playerRoot == null) return;
+            if (ownerCamera == null) return;
+
+            Vector2 mouseWorld = ownerCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            Vector2 dir = mouseWorld - (Vector2)center.position;
+            if (dir.sqrMagnitude < 0.0001f) return;
+
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
             sendTimer -= Time.deltaTime;
             if (sendTimer <= 0f)
             {
                 sendTimer = 1f / Mathf.Max(1f, sendRateHz);
-
-                Vector2 mouseWorld = ownerCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-                Vector2 dir = (mouseWorld - (Vector2)playerRoot.position);
-                if (dir.sqrMagnitude < 0.0001f) return;
-
-                float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 SubmitAimServerRpc(angle);
-
-                // also apply immediately for the owner (no waiting for replication)
-                ApplyBowVisual(angle);
             }
+
+            ApplyOrbitRotationAndFlip(angle);
         }
         else
         {
-            ApplyBowVisual(aimAngleDeg.Value);
+            ApplyOrbitRotationAndFlip(aimAngleDeg.Value);
         }
     }
 
-    private void ApplyBowVisual(float angleDeg)
+    private void ApplyOrbitRotationAndFlip(float angleDeg)
     {
-        // Rotate bow in Z
-        bowTransform.localRotation = Quaternion.Euler(0f, 0f, angleDeg);
+        // Orbit position
+        float rad = angleDeg * Mathf.Deg2Rad;
+        Vector2 orbit = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * radius;
+        transform.position = (Vector2)center.position + orbit + localOffset;
 
-        // If body flips, mirror the bow so it doesn’t look upside-down.
-        if (bodySprite != null)
-        {
-            Vector3 s = bowTransform.localScale;
-            s.y = bodySprite.flipX ? -Mathf.Abs(s.y) : Mathf.Abs(s.y);
-            bowTransform.localScale = s;
-        }
+        // Flip when aiming left
+        bool aimingLeft = Mathf.Cos(rad) < 0f;
+        bool doFlip = flipWhenAimingLeft && aimingLeft;
+        if (invertFlip) doFlip = !doFlip;
+
+        // Apply flip on X scale
+        Vector3 s = transform.localScale;
+        float absX = Mathf.Abs(s.x);
+        s.x = doFlip ? -absX : absX;
+        transform.localScale = s;
+
+        // Rotation:
+        float z = doFlip
+            ? (angleDeg - 180f - spriteAimOffsetDeg)
+            : (angleDeg + spriteAimOffsetDeg);
+
+        transform.rotation = Quaternion.Euler(0f, 0f, z);
     }
 
     [ServerRpc(RequireOwnership = true)]

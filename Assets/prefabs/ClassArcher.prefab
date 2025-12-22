@@ -101,13 +101,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1313932387238128823}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.38268343, w: 0.92387956}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5379443979305331116}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 45}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5209310947980812239
 SpriteRenderer:
   serializedVersion: 2
@@ -180,10 +180,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BowAim2D
   ShowTopMostFoldoutHeaderGroup: 1
-  bowTransform: {fileID: 2777863103532373447}
-  playerRoot: {fileID: 5379443979305331116}
+  center: {fileID: 5379443979305331116}
   ownerCamera: {fileID: 2999750483225606189}
-  bodySprite: {fileID: 7442509775723964772}
+  radius: 1
+  localOffset: {x: 0, y: 0}
+  spriteAimOffsetDeg: 45
+  flipWhenAimingLeft: 1
+  invertFlip: 0
   sendRateHz: 20
 --- !u!1 &2012276575645874826
 GameObject:
