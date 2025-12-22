@@ -8,11 +8,14 @@ public class BowAim2D : NetworkBehaviour
     [SerializeField] private Transform center;
     [SerializeField] private Camera ownerCamera;
 
+    [Tooltip("If set, bow flip will follow this PlayerController's FacingLeft (recommended).")]
+    [SerializeField] private PlayerController player;
+
     [Header("Orbit")]
     [SerializeField] private float radius = 0.45f;
     [SerializeField] private Vector2 localOffset = Vector2.zero;
 
-    [Tooltip("Shift the orbit circle center sideways. Right aim shifts +X, left aim shifts -X.")]
+    [Tooltip("Shift the orbit circle center sideways. Facing right uses +X, facing left uses -X.")]
     [SerializeField] private float orbitCenterShiftX = 0.20f;
 
     [Header("Sprite / Art Alignment")]
@@ -20,9 +23,6 @@ public class BowAim2D : NetworkBehaviour
     [SerializeField] private float spriteAimOffsetDeg = -45f;
 
     [Header("Flip")]
-    [Tooltip("Flip horizontally when aiming left (x < 0).")]
-    [SerializeField] private bool flipWhenAimingLeft = true;
-
     [Tooltip("If your bow looks mirrored the wrong way, invert this.")]
     [SerializeField] private bool invertFlip = false;
 
@@ -37,6 +37,12 @@ public class BowAim2D : NetworkBehaviour
     private void Awake()
     {
         if (center == null) center = transform.root;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (player == null)
+            player = GetComponentInParent<PlayerController>();
     }
 
     private void Update()
@@ -75,12 +81,15 @@ public class BowAim2D : NetworkBehaviour
     {
         float rad = angleDeg * Mathf.Deg2Rad;
 
-        // Decide flip
-        bool aimingLeft = Mathf.Cos(rad) < 0f;
-        bool doFlip = flipWhenAimingLeft && aimingLeft;
+        // Flip should match the BODY facing, not recomputed locally.
+        bool facingLeft = false;
+        if (player != null)
+            facingLeft = player.FacingLeft.Value;
+
+        bool doFlip = facingLeft;
         if (invertFlip) doFlip = !doFlip;
 
-        // Shift orbit circle center left/right depending on flip
+        // Shift orbit circle center left/right depending on facing
         float shift = doFlip ? -orbitCenterShiftX : orbitCenterShiftX;
 
         // Orbit position around shifted center

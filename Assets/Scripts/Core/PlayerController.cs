@@ -31,6 +31,17 @@ public class PlayerController : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
 
+    // NEW: replicated facing (true = facing left / flipX on)
+    public NetworkVariable<bool> FacingLeft = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    [Header("Facing Sync")]
+    [SerializeField] private float facingSendRateHz = 20f;
+    private float _facingSendTimer;
+    private bool _lastSentFacingLeft;
+
     [Header("References")]
     [SerializeField] public stats stats;
     [SerializeField] private Rigidbody2D rb;
@@ -61,7 +72,7 @@ public class PlayerController : NetworkBehaviour
 
             // Determine class from ClassIdentity if present (Archer/Knight/etc). Otherwise Ghost.
             PlayerClass resolved = PlayerClass.Ghost;
-            var ident = GetComponent<ClassIdentity>(); // the small script that holds ClassType
+            var ident = GetComponent<ClassIdentity>();
             if (ident != null)
             {
                 resolved = ident.classType switch
@@ -76,6 +87,10 @@ public class PlayerController : NetworkBehaviour
             Class.Value = resolved;
         }
 
+        // Subscribe so remote clients update visuals when FacingLeft changes
+        FacingLeft.OnValueChanged += OnFacingChanged;
+        ApplyFacing(FacingLeft.Value);
+
         // Always locate the camera under this prefab (if any)
         _localCamera = GetComponentInChildren<Camera>(true);
 
@@ -83,7 +98,10 @@ public class PlayerController : NetworkBehaviour
         {
             // Disable any camera/audio on non-owned player instances
             DisableLocalOnlyComponentsForRemote();
-            enabled = false;
+
+            // IMPORTANT: keep this script enabled so it can apply FacingLeft.Value
+            // Just prevent input/movement/attack by gating with IsOwner elsewhere.
+            inputActive = false;
             return;
         }
 
@@ -95,9 +113,19 @@ public class PlayerController : NetworkBehaviour
         SetupInput();
     }
 
+    private void OnFacingChanged(bool oldV, bool newV)
+    {
+        ApplyFacing(newV);
+    }
+
+    private void ApplyFacing(bool facingLeft)
+    {
+        if (spriteRenderer != null)
+            spriteRenderer.flipX = facingLeft;
+    }
+
     private void DisableLocalOnlyComponentsForRemote()
     {
-        // Disable any camera(s) in this prefab instance
         foreach (var cam in GetComponentsInChildren<Camera>(true))
         {
             cam.enabled = false;
@@ -105,18 +133,15 @@ public class PlayerController : NetworkBehaviour
                 cam.tag = "Untagged";
         }
 
-        // Disable AudioListener if present
         foreach (var al in GetComponentsInChildren<AudioListener>(true))
             al.enabled = false;
 
-        // Disable the camera controller script so it doesn’t move the camera
         var camController = GetComponentInChildren<CameraController>(true);
         if (camController != null) camController.enabled = false;
     }
 
     private void EnableLocalOnlyComponentsForOwner()
     {
-        // Ensure ONLY the owning player's camera becomes MainCamera
         if (_localCamera != null)
         {
             _localCamera.enabled = true;
@@ -146,9 +171,8 @@ public class PlayerController : NetworkBehaviour
 
     private void PerformAttack()
     {
+        if (!IsOwner) return;
         if (primaryAttack == null) return;
-
-        // Use the owner's camera, not Camera.main
         if (_localCamera == null) return;
 
         Vector2 mousePos = _localCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
@@ -171,6 +195,7 @@ public class PlayerController : NetworkBehaviour
 
     public void UseAbility(string name, int level)
     {
+        if (!IsOwner) return;
         if (!inputActive) return;
 
         if (abilityMap.TryGetValue(name, out BaseAbility ability))
@@ -181,13 +206,20 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        if (!IsOwner) return;
+        // Owners drive input + animation params
+        if (IsOwner)
+        {
+            bool isWalking = moveInput.magnitude > 0;
+            if (animator != null) animator.SetBool("walking", isWalking);
 
-        bool isWalking = moveInput.magnitude > 0;
-        if (animator != null) animator.SetBool("walking", isWalking);
-
-        if (animator != null && !animator.GetBool("attack"))
-            HandleRotation();
+            if (animator != null && !animator.GetBool("attack"))
+                HandleRotationOwnerAndSyncFacing();
+        }
+        else
+        {
+            // Non-owners only apply replicated facing
+            ApplyFacing(FacingLeft.Value);
+        }
     }
 
     void FixedUpdate()
@@ -196,12 +228,31 @@ public class PlayerController : NetworkBehaviour
             rb.linearVelocity = moveInput * moveSpeed;
     }
 
-    void HandleRotation()
+    // Owner computes facing from mouse and syncs to server
+    void HandleRotationOwnerAndSyncFacing()
     {
         if (_localCamera == null || spriteRenderer == null) return;
 
         Vector2 mousePos = _localCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        spriteRenderer.flipX = mousePos.x < transform.position.x;
+        bool facingLeft = mousePos.x < transform.position.x;
+
+        // Apply locally immediately
+        spriteRenderer.flipX = facingLeft;
+
+        // Rate-limit + only send when changed
+        _facingSendTimer -= Time.deltaTime;
+        if (facingLeft != _lastSentFacingLeft && _facingSendTimer <= 0f)
+        {
+            _facingSendTimer = 1f / Mathf.Max(1f, facingSendRateHz);
+            _lastSentFacingLeft = facingLeft;
+            SetFacingLeftServerRpc(facingLeft);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = true)]
+    private void SetFacingLeftServerRpc(bool facingLeft)
+    {
+        FacingLeft.Value = facingLeft;
     }
 
     public void SetInputActive(bool active)
@@ -224,9 +275,9 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         if (controls != null) controls.Disable();
+        FacingLeft.OnValueChanged -= OnFacingChanged;
     }
 
-    // TEST: Server RPC to set friendly fire
     [ServerRpc(RequireOwnership = true)]
     public void SetFriendlyFireServerRpc(bool v)
     {
