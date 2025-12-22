@@ -69,7 +69,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 176141625
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -272,6 +272,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f28cef3abdc0aa43b4c98916756fdf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  detectionRange: 50
+  jumpRange: 10
+  crawlSpeed: 2
+  jumpCrawlSpeed: 8
+  knockbackForce: 6
+  retargetInterval: 0.5
 --- !u!4 &7551233969665699125 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1087467593064997020, guid: f15599680e71a224989e18a68e6b596a, type: 3}
@@ -288,6 +295,10 @@ PrefabInstance:
     - target: {fileID: 156813081565667335, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
       propertyPath: m_LocalPosition.z
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 156813081565667335, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 2.24
       objectReference: {fileID: 0}
     - target: {fileID: 1387434697096588362, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
       propertyPath: m_AnchorMax.x
@@ -379,6 +390,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3166260059837092964, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7039041938612107331, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}
+      propertyPath: worldOffset.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7039041938612107331, guid: c2633f386d1283e4bbe4aa1d839f16f3, type: 3}

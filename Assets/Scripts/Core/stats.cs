@@ -30,11 +30,22 @@ public class stats : NetworkBehaviour
             CurrentHP.Value = MaxHP.Value;
         }
 
+        // Auto-find health bar if not assigned in inspector
+        if (healthBar == null)
+            healthBar = GetComponentInChildren<HealthBar>(true);
+
         MaxHP.OnValueChanged += OnMaxHpChanged;
         CurrentHP.OnValueChanged += OnHpChanged;
 
         if (healthBar != null)
+        {
             healthBar.Bind(this);
+
+            // Auto-set follow target if your bar uses HealthBarFollow
+            var follow = healthBar.GetComponentInParent<HealthBarFollow>();
+            if (follow != null && follow.objectToFollow == null)
+                follow.objectToFollow = transform;
+        }
     }
 
     private void OnDestroy()

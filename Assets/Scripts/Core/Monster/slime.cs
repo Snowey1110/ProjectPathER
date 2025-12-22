@@ -14,6 +14,9 @@ public class Slime : NetworkBehaviour
     [Header("Combat")]
     [SerializeField] private float knockbackForce = 6f;
 
+    [SerializeField] private float retargetInterval = 0.5f;
+    private float retargetTimer;
+
     private bool jumpCD;
     private Transform targetPlayer;
 
@@ -31,17 +34,18 @@ public class Slime : NetworkBehaviour
         if (!IsServer)
             return;
 
-        RegisterAnyPlayer();
     }
 
     private void Update()
     {
         if (!IsServer) return;
 
-        if (targetPlayer == null)
+        retargetTimer -= Time.deltaTime;
+        if (targetPlayer == null || retargetTimer <= 0f)
         {
-            RegisterAnyPlayer();
-            return;
+            retargetTimer = retargetInterval;
+            RetargetClosestPlayer();
+            if (targetPlayer == null) return;
         }
 
         float dist = Vector2.Distance(transform.position, targetPlayer.position);
@@ -60,22 +64,37 @@ public class Slime : NetworkBehaviour
             MoveToward(targetPlayer, jumpCrawlSpeed);
     }
 
-    private void RegisterAnyPlayer()
+    private void RetargetClosestPlayer()
     {
-        // In NGO, prefer connected clients' PlayerObject instead of FindWithTag.
-        if (NetworkManager.Singleton == null) return;
+        targetPlayer = null;
 
-        foreach (var c in NetworkManager.Singleton.ConnectedClientsList)
+        // Find all PlayerControllers in the scene
+        var players = Object.FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
+
+        float bestDistSq = float.MaxValue;
+        Vector2 myPos = transform.position;
+
+        foreach (var pc in players)
         {
-            if (c?.PlayerObject != null)
+            if (pc == null) continue;
+            if (!pc.IsSpawned) continue;
+
+            // Ignore lobby ghost
+            if (pc.Class.Value == PlayerController.PlayerClass.Ghost) continue;
+
+            // Ignore dead
+            var st = pc.GetComponent<stats>();
+            if (st != null && st.CurrentHP.Value <= 0) continue;
+
+            float dSq = ((Vector2)pc.transform.position - myPos).sqrMagnitude;
+            if (dSq < bestDistSq)
             {
-                targetPlayer = c.PlayerObject.transform;
-                return;
+                bestDistSq = dSq;
+                targetPlayer = pc.transform;
             }
         }
-
-        targetPlayer = null;
     }
+
 
     private void MoveToward(Transform player, float speed)
     {

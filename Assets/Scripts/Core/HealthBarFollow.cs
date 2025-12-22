@@ -2,50 +2,49 @@ using UnityEngine;
 
 public class HealthBarFollow : MonoBehaviour
 {
+    [Header("Follow Target")]
     public Transform objectToFollow;
-    private RectTransform rectTransform;
-    private Canvas canvas;
 
-    [Tooltip("If null, will use Camera.main (the owning player's camera on each client).")]
-    public Camera worldCamera;
+    [Header("World Offset")]
+    [SerializeField] private Vector3 worldOffset = new Vector3(0f, 1.0f, 0f);
 
-    private void Awake()
+    [Header("Billboard")]
+    [SerializeField] private bool faceCamera = false;
+    [SerializeField] private Camera worldCamera;
+
+    [Header("Cleanup")]
+    [SerializeField] private float destroyGraceSeconds = 0.5f;
+    private float aliveTimer;
+
+    private void OnEnable()
     {
-        rectTransform = GetComponent<RectTransform>();
-        canvas = GetComponentInParent<Canvas>();
+        aliveTimer = 0f;
+
+        // Auto-assign if not set
+        if (objectToFollow == null)
+            objectToFollow = transform.root;
     }
 
     private void LateUpdate()
     {
+        aliveTimer += Time.deltaTime;
+
         if (objectToFollow == null)
         {
-            Destroy(transform.parent.gameObject);
+            if (aliveTimer >= destroyGraceSeconds)
+                Destroy(gameObject); // only destroy the bar itself
             return;
         }
 
-        if (canvas == null) return;
+        // World-space follow
+        transform.position = objectToFollow.position + worldOffset;
 
-        if (worldCamera == null) worldCamera = Camera.main;
-        if (worldCamera == null) return;
-
-        Vector3 screenPos = worldCamera.WorldToScreenPoint(objectToFollow.position);
-
-        // Hide if behind camera
-        if (screenPos.z < 0f)
+        // Optional: keep UI facing camera (usually not needed for 2D orthographic)
+        if (faceCamera)
         {
-            rectTransform.gameObject.SetActive(false);
-            return;
+            if (worldCamera == null) worldCamera = Camera.main;
+            if (worldCamera != null)
+                transform.forward = worldCamera.transform.forward;
         }
-
-        rectTransform.gameObject.SetActive(true);
-
-        RectTransform canvasRect = canvas.transform as RectTransform;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRect,
-            screenPos,
-            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : worldCamera,
-            out Vector2 localPoint);
-
-        rectTransform.anchoredPosition = localPoint;
     }
 }
