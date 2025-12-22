@@ -12,6 +12,9 @@ public class BowAim2D : NetworkBehaviour
     [SerializeField] private float radius = 0.45f;
     [SerializeField] private Vector2 localOffset = Vector2.zero;
 
+    [Tooltip("Shift the orbit circle center sideways. Right aim shifts +X, left aim shifts -X.")]
+    [SerializeField] private float orbitCenterShiftX = 0.20f;
+
     [Header("Sprite / Art Alignment")]
     [Tooltip("Your bow art points down by default.")]
     [SerializeField] private float spriteAimOffsetDeg = -45f;
@@ -70,15 +73,20 @@ public class BowAim2D : NetworkBehaviour
 
     private void ApplyOrbitRotationAndFlip(float angleDeg)
     {
-        // Orbit position
         float rad = angleDeg * Mathf.Deg2Rad;
-        Vector2 orbit = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * radius;
-        transform.position = (Vector2)center.position + orbit + localOffset;
 
-        // Flip when aiming left
+        // Decide flip
         bool aimingLeft = Mathf.Cos(rad) < 0f;
         bool doFlip = flipWhenAimingLeft && aimingLeft;
         if (invertFlip) doFlip = !doFlip;
+
+        // Shift orbit circle center left/right depending on flip
+        float shift = doFlip ? -orbitCenterShiftX : orbitCenterShiftX;
+
+        // Orbit position around shifted center
+        Vector2 orbit = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * radius;
+        Vector2 shiftedCenter = (Vector2)center.position + new Vector2(shift, 0f);
+        transform.position = shiftedCenter + orbit + localOffset;
 
         // Apply flip on X scale
         Vector3 s = transform.localScale;
@@ -86,7 +94,7 @@ public class BowAim2D : NetworkBehaviour
         s.x = doFlip ? -absX : absX;
         transform.localScale = s;
 
-        // Rotation:
+        // Rotation
         float z = doFlip
             ? (angleDeg - 180f - spriteAimOffsetDeg)
             : (angleDeg + spriteAimOffsetDeg);

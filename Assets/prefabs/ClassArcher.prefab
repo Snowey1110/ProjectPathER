@@ -184,6 +184,7 @@ MonoBehaviour:
   ownerCamera: {fileID: 2999750483225606189}
   radius: 1
   localOffset: {x: 0, y: 0}
+  orbitCenterShiftX: 0.2
   spriteAimOffsetDeg: 45
   flipWhenAimingLeft: 1
   invertFlip: 0
