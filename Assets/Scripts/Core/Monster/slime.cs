@@ -24,6 +24,10 @@ public class Slime : NetworkBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
 
+    private Vector2 _moveDir;
+    private float _moveSpeed;
+    private bool _wantsMove;
+
     public override void OnNetworkSpawn()
     {
         animator = GetComponent<Animator>();
@@ -45,23 +49,52 @@ public class Slime : NetworkBehaviour
         {
             retargetTimer = retargetInterval;
             RetargetClosestPlayer();
-            if (targetPlayer == null) return;
+            if (targetPlayer == null)
+            {
+                _wantsMove = false;
+                return;
+            }
         }
 
         float dist = Vector2.Distance(transform.position, targetPlayer.position);
 
         if (dist < jumpRange && !jumpCD)
-        {
             StartJump();
-        }
 
         bool jumping = animator != null && animator.GetBool("jumping");
 
-        if (dist < detectionRange && !jumping)
-            MoveToward(targetPlayer, crawlSpeed);
+        if (dist < detectionRange)
+        {
+            _moveSpeed = jumping ? jumpCrawlSpeed : crawlSpeed;
+            _moveDir = ((Vector2)targetPlayer.position - (Vector2)transform.position).normalized;
+            _wantsMove = !jumping || jumping; // keep moving either way
 
-        if (dist < detectionRange && jumping)
-            MoveToward(targetPlayer, jumpCrawlSpeed);
+            // Flip on server (replicated visually enough for now)
+            if (spriteRenderer != null)
+            {
+                if (_moveDir.x > 0) spriteRenderer.flipX = false;
+                else if (_moveDir.x < 0) spriteRenderer.flipX = true;
+            }
+        }
+        else
+        {
+            _wantsMove = false;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!IsServer) return;
+        if (rb == null) return;
+
+        if (!_wantsMove)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        // Drive physics motion on server so NetworkRigidbody2D/NetworkTransform can replicate cleanly.
+        rb.linearVelocity = _moveDir * _moveSpeed;
     }
 
     private void RetargetClosestPlayer()
@@ -92,22 +125,6 @@ public class Slime : NetworkBehaviour
                 bestDistSq = dSq;
                 targetPlayer = pc.transform;
             }
-        }
-    }
-
-
-    private void MoveToward(Transform player, float speed)
-    {
-        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-
-        // Server-authoritative movement.
-        transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
-
-        // Flip (server drives; clients see via animator/sprite state if you replicate, otherwise acceptable as cosmetic)
-        if (spriteRenderer != null)
-        {
-            if (dir.x > 0) spriteRenderer.flipX = false;
-            else if (dir.x < 0) spriteRenderer.flipX = true;
         }
     }
 
