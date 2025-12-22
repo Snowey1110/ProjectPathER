@@ -27,7 +27,7 @@ public class BowAim2D : NetworkBehaviour
     [SerializeField] private bool invertFlip = false;
 
     [Header("Networking")]
-    [SerializeField] private float sendRateHz = 20f;
+    [SerializeField] private float sendRateHz = 30f;
 
     private readonly NetworkVariable<float> aimAngleDeg = new NetworkVariable<float>(
         0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
