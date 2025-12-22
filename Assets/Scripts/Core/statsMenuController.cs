@@ -84,7 +84,7 @@ public class statsMenuController : MonoBehaviour
                 case "HPP":
                     tempHPP += 1;
                     playerStats.HP += 1;
-                    playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
+                    playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
                     break;
                 case "MPP":
                     tempMPP += 1;
@@ -130,7 +130,7 @@ public class statsMenuController : MonoBehaviour
                 case "HPP":
                     tempHPP += 10;
                     playerStats.HP += 10;
-                    playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
+                    playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
                     break;
                 case "MPP":
                     tempMPP += 10;
@@ -157,7 +157,7 @@ public class statsMenuController : MonoBehaviour
         tempATK = 0;
         playerStats.HP -= tempHPP;
         tempHPP = 0;
-        playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
+        playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
         playerStats.mana -= tempMPP;
         tempMPP = 0;
         playerStats.defense -= tempDEF;
@@ -213,7 +213,7 @@ public class statsMenuController : MonoBehaviour
             case 3:
                 tempHPP += 1;
                 playerStats.HP += 1;
-                playerStats.healthBar.SetMaxHealth(playerStats.HP, playerStats.currentHealth);
+                playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
                 break;
             case 4:
                 tempMPP += 1;
@@ -224,7 +224,7 @@ public class statsMenuController : MonoBehaviour
                 return;
         }
         //Regen player to full HP
-        playerStats.currentHealth = playerStats.HP; 
+        playerStats.CurrentHP.Value = playerStats.HP; 
         playerStats.healthBar.SetHealth(-1); 
 
         playerStats.abilityPoints += 5; //Give 5 ability points on leveling

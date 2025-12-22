@@ -1,124 +1,138 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Slime : MonoBehaviour
+public class Slime : NetworkBehaviour
 {
+    [Header("AI Ranges")]
+    [SerializeField] private float detectionRange = 50f;
+    [SerializeField] private float jumpRange = 10f;
 
-    private float detectionRange = 50.0f; // Range within which the slime detects the player
-    private float jumpRange = 10.0f;       // Range within which the slime will jump towards the player
-    private bool jumpCD = false;
-    private Transform player;            // Reference to the player's transform
-    private Animator animator;           // Reference to the Animator component
-    private Rigidbody2D rb;              // Reference to the Rigidbody2D component
-    private SpriteRenderer spriteRenderer; // Reference to the SpriteRenderer component
+    [Header("Speeds")]
+    [SerializeField] private float crawlSpeed = 2f;
+    [SerializeField] private float jumpCrawlSpeed = 8f;
 
+    [Header("Combat")]
+    [SerializeField] private float knockbackForce = 6f;
 
-    void Start()
+    private bool jumpCD;
+    private Transform targetPlayer;
+
+    private Animator animator;
+    private Rigidbody2D rb;
+    private SpriteRenderer spriteRenderer;
+
+    public override void OnNetworkSpawn()
     {
-        // Try to find the player in the scene
-        RegisterPlayer();
-
-        // Get the Animator component attached to the slime
         animator = GetComponent<Animator>();
-
-        // Get the Rigidbody2D component attached to the slime
         rb = GetComponent<Rigidbody2D>();
-
-        // Get the SpriteRenderer component attached to the slime
         spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // Only the server runs AI + applies damage.
+        if (!IsServer)
+            return;
+
+        RegisterAnyPlayer();
     }
 
-    void Update()
+    private void Update()
     {
-        // If no player is found, try to find the player
-        if (player == null)
+        if (!IsServer) return;
+
+        if (targetPlayer == null)
         {
-            RegisterPlayer();
+            RegisterAnyPlayer();
             return;
         }
 
-        // Calculate the distance to the player
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        float dist = Vector2.Distance(transform.position, targetPlayer.position);
 
-        // If the player is within jump range and the cooldown has elapsed, perform the jump
-        if (distanceToPlayer < jumpRange && jumpCD == false)
+        if (dist < jumpRange && !jumpCD)
         {
-            jumpingTrue();
-            
+            StartJump();
         }
 
-        // If the player is within detection range and not jumping, start crawling towards them
-        if (distanceToPlayer < detectionRange && !animator.GetBool("jumping"))
+        bool jumping = animator != null && animator.GetBool("jumping");
+
+        if (dist < detectionRange && !jumping)
+            MoveToward(targetPlayer, crawlSpeed);
+
+        if (dist < detectionRange && jumping)
+            MoveToward(targetPlayer, jumpCrawlSpeed);
+    }
+
+    private void RegisterAnyPlayer()
+    {
+        // In NGO, prefer connected clients' PlayerObject instead of FindWithTag.
+        if (NetworkManager.Singleton == null) return;
+
+        foreach (var c in NetworkManager.Singleton.ConnectedClientsList)
         {
-            SlimeMove(2);
+            if (c?.PlayerObject != null)
+            {
+                targetPlayer = c.PlayerObject.transform;
+                return;
+            }
         }
 
-        if (distanceToPlayer < detectionRange && animator.GetBool("jumping"))
+        targetPlayer = null;
+    }
+
+    private void MoveToward(Transform player, float speed)
+    {
+        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+
+        // Server-authoritative movement.
+        transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
+
+        // Flip (server drives; clients see via animator/sprite state if you replicate, otherwise acceptable as cosmetic)
+        if (spriteRenderer != null)
         {
-            SlimeMove(8);
+            if (dir.x > 0) spriteRenderer.flipX = false;
+            else if (dir.x < 0) spriteRenderer.flipX = true;
         }
     }
 
-    void RegisterPlayer()
+    private void StartJump()
     {
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-
-        if (playerObject != null)
-        {
-            player = playerObject.transform;
-        }
-    }
-
-    void SlimeMove(float crawlSpeed)
-    {
-        // Move towards the player
-        Vector2 direction = (player.position - transform.position).normalized;
-        transform.position = Vector2.MoveTowards(transform.position, player.position, crawlSpeed * Time.deltaTime);
-
-        // Flip the sprite based on the direction
-        if (direction.x > 0)
-        {
-            spriteRenderer.flipX = false;
-        }
-        else if (direction.x < 0)
-        {
-            spriteRenderer.flipX = true;
-        }
-    }
-
-
-    public void jumpingTrue()
-    {
-        animator.SetBool("jumping", true);
+        if (animator != null) animator.SetBool("jumping", true);
         jumpCD = true;
-        Invoke("ResetCooldown", Random.Range(2, 5));
+
+        // Cooldown reset on server
+        Invoke(nameof(ResetCooldown), Random.Range(2, 5));
     }
 
-    void ResetCooldown()
+    private void ResetCooldown()
     {
         jumpCD = false;
     }
+
+    // Called by animation event if you have one.
     public void jumpingFalse()
     {
-        animator.SetBool("jumping", false);
+        if (!IsServer) return;
+        if (animator != null) animator.SetBool("jumping", false);
     }
 
-
-    void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            // Deal damage to the player
-            stats playerStats = collision.gameObject.GetComponent<stats>();
-            int slimeAttackStats = gameObject.GetComponent<stats>().baseDamage;
-            playerStats.takeDamage(slimeAttackStats);
+        if (!IsServer) return;
 
-            // Knockback effect
-            Vector2 knockbackDirection = (transform.position - collision.transform.position).normalized;
-            float knockbackForce = 100.0f; 
-            rb.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
+        // Only damage real player objects (spawned player characters), not lobby ghosts.
+        var pc = collision.gameObject.GetComponentInParent<PlayerController>();
+        if (pc == null) return;
+
+        // Deal damage server-side only
+        stats playerStats = pc.GetComponent<stats>();
+        stats slimeStats = GetComponent<stats>();
+
+        if (playerStats != null && slimeStats != null)
+            playerStats.takeDamage(slimeStats.baseDamage);
+
+        // Knockback slime away from player (server)
+        if (rb != null)
+        {
+            Vector2 away = ((Vector2)transform.position - (Vector2)collision.transform.position).normalized;
+            rb.AddForce(away * knockbackForce, ForceMode2D.Impulse);
         }
     }
-
 }

@@ -101,7 +101,7 @@ public class Arrow : NetworkBehaviour
             if (targetPC.Class.Value == PlayerClass.Ghost) return;
 
             // Always ignore Archer class
-            if (targetPC.Class.Value == PlayerClass.Archer) return;
+            //if (targetPC.Class.Value == PlayerClass.Archer) return;
 
             // Friendly fire OFF: ignore other player classes
             if (!friendlyFire) return;

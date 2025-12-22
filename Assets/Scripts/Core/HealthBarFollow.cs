@@ -1,27 +1,51 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-//Put this script on Health Bar Canvas
 public class HealthBarFollow : MonoBehaviour
 {
     public Transform objectToFollow;
-    RectTransform rectTransform;
+    private RectTransform rectTransform;
+    private Canvas canvas;
+
+    [Tooltip("If null, will use Camera.main (the owning player's camera on each client).")]
+    public Camera worldCamera;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
+        canvas = GetComponentInParent<Canvas>();
     }
-    private void Update()
+
+    private void LateUpdate()
     {
         if (objectToFollow == null)
         {
             Destroy(transform.parent.gameObject);
+            return;
         }
-        if (objectToFollow != null)
+
+        if (canvas == null) return;
+
+        if (worldCamera == null) worldCamera = Camera.main;
+        if (worldCamera == null) return;
+
+        Vector3 screenPos = worldCamera.WorldToScreenPoint(objectToFollow.position);
+
+        // Hide if behind camera
+        if (screenPos.z < 0f)
         {
-            rectTransform.anchoredPosition = objectToFollow.localPosition;
+            rectTransform.gameObject.SetActive(false);
+            return;
         }
-        
+
+        rectTransform.gameObject.SetActive(true);
+
+        RectTransform canvasRect = canvas.transform as RectTransform;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRect,
+            screenPos,
+            canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : worldCamera,
+            out Vector2 localPoint);
+
+        rectTransform.anchoredPosition = localPoint;
     }
 }

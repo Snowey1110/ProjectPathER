@@ -775,15 +775,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 343bbcf5dcc0d64438d0fefe94efee88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   healthBar: {fileID: 2490360024933785847}
   HP: 10
-  currentHealth: 0
   defense: 1
   mana: 10
   baseDamage: 1
   level: 0
   abilityPoints: 11
   skillPoints: 2
+  MaxHP:
+    m_InternalValue: 10
+  CurrentHP:
+    m_InternalValue: 10
 --- !u!95 &5161156361555879160
 Animator:
   serializedVersion: 7
