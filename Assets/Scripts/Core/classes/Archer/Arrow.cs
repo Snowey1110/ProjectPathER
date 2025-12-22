@@ -15,6 +15,8 @@ public class Arrow : NetworkBehaviour
     private int damage;
     private bool initialized;
     private bool friendlyFire;
+    public float SpriteAngleOffsetDeg => spriteAngleOffsetDeg;
+
 
     private void Awake()
     {

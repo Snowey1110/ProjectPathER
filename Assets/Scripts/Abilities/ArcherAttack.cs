@@ -33,8 +33,11 @@ public class ArcherAttack : BaseAttack
             return;
         }
 
-        // Minimal ownership validation (keeps stability but still prevents other clients from spoofing shots)
+        // Validate ownership: only the owner of shooter can request shots
         if (shooterNo.OwnerClientId != rpcParams.Receive.SenderClientId) return;
+
+        if (dir.sqrMagnitude < 0.0001f) return;
+        dir.Normalize();
 
         Vector3 shooterPos = shooterNo.transform.position;
 
@@ -45,7 +48,18 @@ public class ArcherAttack : BaseAttack
 
         Vector3 spawnPos = shooterPos + (Vector3)dir * (radius + extraSpawnPadding);
 
-        GameObject arrowGo = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
+        // Compute rotation BEFORE Spawn() so clients receive correct orientation in spawn payload
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+        // Read offset from prefab's Arrow component (so art alignment stays in one place)
+        float offsetDeg = 0f;
+        var prefabArrow = arrowPrefab.GetComponent<Arrow>();
+        if (prefabArrow != null)
+            offsetDeg = prefabArrow.SpriteAngleOffsetDeg;
+
+        Quaternion spawnRot = Quaternion.Euler(0f, 0f, angle + offsetDeg);
+
+        GameObject arrowGo = Instantiate(arrowPrefab, spawnPos, spawnRot);
 
         var arrowNo = arrowGo.GetComponent<NetworkObject>();
         if (arrowNo == null)
@@ -59,13 +73,15 @@ public class ArcherAttack : BaseAttack
         var shooterStats = shooterNo.GetComponent<stats>();
         if (shooterStats != null) dmg = shooterStats.baseDamage;
 
-        // Read friendly fire + class from PlayerController (server authoritative)
+        // Friendly fire from PlayerController (server authoritative)
         bool ff = false;
         var shooterPC = shooterNo.GetComponent<PlayerController>();
         if (shooterPC != null) ff = shooterPC.FriendlyFire.Value;
 
+        // Spawn on network (clients will create with spawnRot)
         arrowNo.Spawn(true);
 
+        // Initialize server physics + collision ignore rules
         var arrow = arrowGo.GetComponent<Arrow>();
         if (arrow != null)
             arrow.ServerInit(dir, arrowSpeed, dmg, shooterId, ff);
