@@ -102,14 +102,24 @@ public class SlimeSpawner : NetworkBehaviour
     {
         if (NetworkManager.Singleton == null) return null;
 
-        foreach (var c in NetworkManager.Singleton.ConnectedClientsList)
+        // Find playable character (has PlayerController).
+        foreach (var kvp in NetworkManager.Singleton.SpawnManager.SpawnedObjects)
         {
-            if (c?.PlayerObject != null)
-                return c.PlayerObject.transform;
+            NetworkObject no = kvp.Value;
+            if (no == null) continue;
+
+            PlayerController pc = no.GetComponent<PlayerController>();
+            if (pc == null) continue;
+
+            // If you have a lobby/ghost placeholder, skip it
+            if (pc.Class.Value == PlayerController.PlayerClass.Ghost) continue;
+
+            return pc.transform;
         }
 
         return null;
     }
+
 
     private void SpawnSlimes(Transform player)
     {
@@ -121,15 +131,18 @@ public class SlimeSpawner : NetworkBehaviour
             do
             {
                 Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
-                randomOffset.z = 0f;
+                randomOffset.z = 0f; // keep offset on 2D plane
+
                 spawnPosition = player.position + randomOffset;
+                spawnPosition.z = 0f; // FORCE slime Z=0
+
                 guard++;
             }
             while (Vector3.Distance(spawnPosition, player.position) < minimumSpawnDistance && guard < 50);
 
             GameObject slime = Instantiate(slimePrefab, spawnPosition, Quaternion.identity);
 
-            var no = slime.GetComponent<NetworkObject>();
+            NetworkObject no = slime.GetComponent<NetworkObject>();
             if (no == null)
             {
                 Debug.LogError("[SlimeSpawner] Slime prefab missing NetworkObject.");
@@ -140,4 +153,5 @@ public class SlimeSpawner : NetworkBehaviour
             no.Spawn(true);
         }
     }
+
 }

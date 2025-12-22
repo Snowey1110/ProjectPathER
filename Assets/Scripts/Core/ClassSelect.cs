@@ -44,10 +44,12 @@ public class ClassSelect : NetworkBehaviour
         // Spawn it on the Network
         if (newCharacter != null)
         {
-            // This turns the "Local GameObject" into a "Networked Object"
-            // "SpawnAsPlayerObject" automatically sets "IsOwner = true" for that specific client.
+            int slot = (int)(clientId % 8);
+            newCharacter.transform.position = new Vector3(slot * 3.0f, 0f, 0f); // Z=0
+
             newCharacter.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
         }
+
     }
 }
 

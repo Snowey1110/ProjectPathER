@@ -102,7 +102,9 @@ public class LobbyManager : NetworkBehaviour
         }
 
         Vector3 spawnPos = GetSpawnPosition(clientId);
+        spawnPos.z = 0f;
         GameObject go = Instantiate(prefab, spawnPos, Quaternion.identity);
+
 
         NetworkObject no = go.GetComponent<NetworkObject>();
         if (no == null)
@@ -167,15 +169,20 @@ public class LobbyManager : NetworkBehaviour
     {
         if (spawnPoints != null && spawnPoints.Length > 0)
         {
-            // Deterministic-ish: spread clients across spawn points
             int idx = (int)(clientId % (ulong)spawnPoints.Length);
-            if (spawnPoints[idx] != null) return spawnPoints[idx].position;
+            if (spawnPoints[idx] != null)
+            {
+                Vector3 p = spawnPoints[idx].position;
+                p.z = 0f; // FORCE spawn point Z=0
+                return p;
+            }
         }
 
-        // Fallback: spread along X
+        // Fallback: spread along X at Z=0
         int slot = (int)(clientId % 8);
         return new Vector3(slot * 3.0f, 0f, 0f);
     }
+
 
     public void ReleaseClass(ClassType type)
     {
