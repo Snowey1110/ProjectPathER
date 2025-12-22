@@ -703,7 +703,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1097854924, guid: 3db32d78d4e1892458c48b58ba676d1a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -757,7 +757,7 @@ MonoBehaviour:
   FriendlyFire:
     m_InternalValue: 0
   Class:
-    m_InternalValue: 0
+    m_InternalValue: 2
   FacingLeft:
     m_InternalValue: 0
   facingSendRateHz: 20
