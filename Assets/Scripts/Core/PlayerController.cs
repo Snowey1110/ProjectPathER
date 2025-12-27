@@ -220,10 +220,9 @@ public class PlayerController : NetworkBehaviour
                 bool isWalking = moveInput.sqrMagnitude > 0.0001f;
                 animator.SetBool("walking", isWalking);
 
-                float walkMult = isWalking ? (moveSpeed / WALK_SPEED_DIVISOR) : 1f;
-                animator.SetFloat(walkSpeedParam, walkMult);
+                // Always recompute each frame so inspector changes take effect immediately
+                UpdateWalkAnimSpeed(isWalking);
             }
-
 
             if (animator != null && !animator.GetBool("attack"))
                 HandleRotationOwnerAndSyncFacing();
@@ -232,6 +231,7 @@ public class PlayerController : NetworkBehaviour
         {
             ApplyFacing(FacingLeft.Value);
         }
+
 
     }
 
@@ -289,6 +289,27 @@ public class PlayerController : NetworkBehaviour
     {
         if (controls != null) controls.Disable();
         FacingLeft.OnValueChanged -= OnFacingChanged;
+    }
+
+    private void UpdateWalkAnimSpeed(bool isWalking)
+    {
+        if (animator == null) return;
+
+        float walkMult = isWalking ? (moveSpeed / WALK_SPEED_DIVISOR) : 1f;
+        animator.SetFloat(walkSpeedParam, walkMult);
+    }
+
+    // Called in editor when values change in the Inspector.
+    // During Play Mode, update the animator immediately.
+    private void OnValidate()
+    {
+
+        if (!Application.isPlaying) return;
+        // Only the owner should drive animation params
+        if (!IsOwner) return;
+
+        bool isWalking = moveInput.sqrMagnitude > 0.0001f;
+        UpdateWalkAnimSpeed(isWalking);
     }
 
     [ServerRpc(RequireOwnership = true)]

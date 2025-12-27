@@ -92,7 +92,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2777863103532373447
 Transform:
   m_ObjectHideFlags: 0
@@ -766,7 +766,7 @@ MonoBehaviour:
   rb: {fileID: 0}
   animator: {fileID: 5161156361555879160}
   spriteRenderer: {fileID: 0}
-  moveSpeed: 5
+  moveSpeed: 8
 --- !u!114 &5534538148860239083
 MonoBehaviour:
   m_ObjectHideFlags: 0
