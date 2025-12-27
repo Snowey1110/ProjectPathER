@@ -27258,7 +27258,6 @@ MonoBehaviour:
   minimumSpawnDistance: 40
   spawnInterval: 5
   spawnCount: 2
-  maxActiveSlimes: 10
   startAsDayTime: 1
   spawnImmediatelyOnNight: 1
   toggleKey: 287
