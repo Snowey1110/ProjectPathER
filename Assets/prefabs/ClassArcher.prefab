@@ -92,7 +92,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2777863103532373447
 Transform:
   m_ObjectHideFlags: 0
@@ -727,7 +727,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3316762627
+  GlobalObjectIdHash: 3399499949
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -754,6 +754,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   defaultFriendlyFire: 1
+  walkSpeedParam: WalkSpeed
   FriendlyFire:
     m_InternalValue: 0
   Class:
@@ -765,7 +766,7 @@ MonoBehaviour:
   rb: {fileID: 0}
   animator: {fileID: 5161156361555879160}
   spriteRenderer: {fileID: 0}
-  moveSpeed: 15
+  moveSpeed: 5
 --- !u!114 &5534538148860239083
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -20,6 +20,12 @@ public class PlayerController : NetworkBehaviour
     [Header("Combat Rules")]
     [SerializeField] private bool defaultFriendlyFire = true;
 
+    [Header("Walk Animation Speed")]
+    [SerializeField] private string walkSpeedParam = "WalkSpeedMult";
+    private const float WALK_SPEED_DIVISOR = 8.0f;
+
+
+
     // Server-authoritative replicated settings
     public NetworkVariable<bool> FriendlyFire = new NetworkVariable<bool>(
         false,
@@ -209,17 +215,24 @@ public class PlayerController : NetworkBehaviour
         // Owners drive input + animation params
         if (IsOwner)
         {
-            bool isWalking = moveInput.magnitude > 0;
-            if (animator != null) animator.SetBool("walking", isWalking);
+            if (animator != null)
+            {
+                bool isWalking = moveInput.sqrMagnitude > 0.0001f;
+                animator.SetBool("walking", isWalking);
+
+                float walkMult = isWalking ? (moveSpeed / WALK_SPEED_DIVISOR) : 1f;
+                animator.SetFloat(walkSpeedParam, walkMult);
+            }
+
 
             if (animator != null && !animator.GetBool("attack"))
                 HandleRotationOwnerAndSyncFacing();
         }
         else
         {
-            // Non-owners only apply replicated facing
             ApplyFacing(FacingLeft.Value);
         }
+
     }
 
     void FixedUpdate()
