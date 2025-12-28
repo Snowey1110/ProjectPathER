@@ -18,38 +18,41 @@ public class ClassSelect : NetworkBehaviour
     public GameObject selectionUI;
     public void selectArcher()
     {
-        // We ask the Server to do the work.
-        // We pass our own ID so the server knows who to give the object to.
-        RequestSpawnServerRpc(0, NetworkManager.Singleton.LocalClientId);
+        RequestSpawnRpc(0);
 
-        // Hide the menu immediately for the local player
         if (selectionUI != null) selectionUI.SetActive(false);
-        else gameObject.SetActive(false); // Fallback if you didn't assign UI
+        else gameObject.SetActive(false);
     }
 
-    [ServerRpc(RequireOwnership = false)] // "False" means a client (who doesn't own this object yet) can call it.
-    private void RequestSpawnServerRpc(int classIndex, ulong clientId)
+    [Rpc(SendTo.Server)]
+    private void RequestSpawnRpc(int classIndex, RpcParams rpcParams = default)
     {
-        GameObject newCharacter = null;
+        ulong clientId = rpcParams.Receive.SenderClientId;
 
-        // Pick the correct prefab
-        switch (classIndex)
+        GameObject prefab = classIndex switch
         {
-            case 0: newCharacter = Instantiate(Archer); break;
-            case 1: newCharacter = Instantiate(Knight); break;
-            case 2: newCharacter = Instantiate(Mage); break;
-            case 3: newCharacter = Instantiate(Healer); break;
+            0 => Archer,
+            1 => Knight,
+            2 => Mage,
+            3 => Healer,
+            _ => null
+        };
+
+        if (prefab == null) return;
+
+        GameObject newCharacter = Instantiate(prefab);
+
+        int slot = (int)(clientId % 8);
+        newCharacter.transform.position = new Vector3(slot * 3.0f, 0f, 0f);
+
+        var netObj = newCharacter.GetComponent<NetworkObject>();
+        if (netObj == null)
+        {
+            Destroy(newCharacter);
+            return;
         }
 
-        // Spawn it on the Network
-        if (newCharacter != null)
-        {
-            int slot = (int)(clientId % 8);
-            newCharacter.transform.position = new Vector3(slot * 3.0f, 0f, 0f); // Z=0
-
-            newCharacter.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
-        }
-
+        netObj.SpawnAsPlayerObject(clientId);
     }
 }
 

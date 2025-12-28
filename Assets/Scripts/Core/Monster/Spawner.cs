@@ -43,11 +43,18 @@ public class SlimeSpawner : NetworkBehaviour
         isDayTime.OnValueChanged += OnDayTimeChanged;
     }
 
-    private void OnDestroy()
+    public override void OnNetworkDespawn()
     {
-        if (IsServer)
-            isDayTime.OnValueChanged -= OnDayTimeChanged;
+        isDayTime.OnValueChanged -= OnDayTimeChanged;
+        base.OnNetworkDespawn();
     }
+
+    public override void OnDestroy()
+    {
+        isDayTime.OnValueChanged -= OnDayTimeChanged;
+        base.OnDestroy();
+    }
+
 
     private void OnDayTimeChanged(bool oldValue, bool newValue)
     {

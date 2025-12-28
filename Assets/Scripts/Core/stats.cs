@@ -48,10 +48,12 @@ public class stats : NetworkBehaviour
         }
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         MaxHP.OnValueChanged -= OnMaxHpChanged;
         CurrentHP.OnValueChanged -= OnHpChanged;
+
+        base.OnDestroy();
     }
 
     private void OnMaxHpChanged(int oldV, int newV)
