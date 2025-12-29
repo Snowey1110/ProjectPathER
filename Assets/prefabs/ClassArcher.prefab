@@ -86,6 +86,8 @@ GameObject:
   - component: {fileID: 2777863103532373447}
   - component: {fileID: 5209310947980812239}
   - component: {fileID: 6664443846984006125}
+  - component: {fileID: 1003147259161638510}
+  - component: {fileID: 8228283866883253546}
   m_Layer: 0
   m_Name: Bow
   m_TagString: Untagged
@@ -189,6 +191,50 @@ MonoBehaviour:
   spriteAimOffsetDeg: 45
   invertFlip: 0
   sendRateHz: 20
+--- !u!95 &1003147259161638510
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313932387238128823}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 43812c261f85c104e911f1af8fb24172, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8228283866883253546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313932387238128823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList:
+  - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: -1577386167
+    DestinationState: 316948267
+    TransitionDuration: 0
+    TriggerNameHash: -1316629574
+    TransitionIndex: 0
+  m_Animator: {fileID: 1003147259161638510}
 --- !u!1 &2012276575645874826
 GameObject:
   m_ObjectHideFlags: 0
@@ -764,6 +810,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   defaultFriendlyFire: 1
   walkSpeedParam: WalkSpeed
+  bowNetAnimator: {fileID: 8228283866883253546}
+  bowShootTrigger: Shoot
   FriendlyFire:
     m_InternalValue: 0
   Class:
@@ -900,21 +948,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClientNetworkAnimator
   ShowTopMostFoldoutHeaderGroup: 1
-  TransitionStateInfoList:
-  - IsCrossFadeExit: 0
-    Layer: 0
-    OriginatingState: 1673437632
-    DestinationState: -1588234362
-    TransitionDuration: 0
-    TriggerNameHash: 1203776827
-    TransitionIndex: 1
-  - IsCrossFadeExit: 0
-    Layer: 0
-    OriginatingState: 839609984
-    DestinationState: -1588234362
-    TransitionDuration: 0
-    TriggerNameHash: 1203776827
-    TransitionIndex: 1
+  TransitionStateInfoList: []
   m_Animator: {fileID: 5161156361555879160}
 --- !u!114 &505532009114708831
 MonoBehaviour:

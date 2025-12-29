@@ -24,6 +24,11 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private string walkSpeedParam = "WalkSpeedMult";
     private const float WALK_SPEED_DIVISOR = 8.0f;
 
+    [Header("Bow Animation")]
+    [SerializeField] private Unity.Netcode.Components.NetworkAnimator bowNetAnimator;
+    [SerializeField] private string bowShootTrigger = "Shoot";
+
+
 
 
     // Server-authoritative replicated settings
@@ -187,6 +192,10 @@ public class PlayerController : NetworkBehaviour
         primaryAttack.Fire(direction);
 
         if (animator != null) animator.SetTrigger("attack");
+
+        if (bowNetAnimator != null)
+            bowNetAnimator.SetTrigger(bowShootTrigger);
+
     }
 
     private void InitializeAbilities()
@@ -224,8 +233,7 @@ public class PlayerController : NetworkBehaviour
                 UpdateWalkAnimSpeed(isWalking);
             }
 
-            if (animator != null && !animator.GetBool("attack"))
-                HandleRotationOwnerAndSyncFacing();
+            HandleRotationOwnerAndSyncFacing();
         }
         else
         {
@@ -317,4 +325,6 @@ public class PlayerController : NetworkBehaviour
     {
         FriendlyFire.Value = v;
     }
+
+
 }
