@@ -262,7 +262,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = true)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void SetFacingLeftServerRpc(bool facingLeft)
     {
         FacingLeft.Value = facingLeft;
@@ -312,7 +312,7 @@ public class PlayerController : NetworkBehaviour
         UpdateWalkAnimSpeed(isWalking);
     }
 
-    [ServerRpc(RequireOwnership = true)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     public void SetFriendlyFireServerRpc(bool v)
     {
         FriendlyFire.Value = v;

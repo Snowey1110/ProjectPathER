@@ -499,13 +499,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
   player: {fileID: 5379443979305331116}
-  panSpeed: 20
+  panSpeed: 200
   panBorderThickness: 10
   panLimit: {x: 10, y: 10}
+  unlockedPanSpeedMult: 3
+  edgePanSpeedMult: 1.75
+  softFollowBackOnRelock: 1
+  softFollowBackSmoothTime: 1
+  softFollowBackSnapDistance: 999
   zoomSpeed: 5
   minZoom: 5
   maxZoom: 20
+  scrollScale: 0.1
   smoothTime: 0.2
+  lockedFollowSmooth: 1
+  lockedFollowSmoothTime: 0.08
+  lockedFollowSnapDistance: 10
 --- !u!1 &8558622511871034358
 GameObject:
   m_ObjectHideFlags: 0

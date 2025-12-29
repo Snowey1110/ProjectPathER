@@ -17,11 +17,11 @@ public class ArcherAttack : BaseAttack
         if (direction.sqrMagnitude < 0.0001f) return;
         direction.Normalize();
 
-        SpawnArrowServerRpc(direction, NetworkObjectId);
+        SpawnArrowRpc(direction, NetworkObjectId);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void SpawnArrowServerRpc(Vector2 dir, ulong shooterId, ServerRpcParams rpcParams = default)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SpawnArrowRpc(Vector2 dir, ulong shooterId, RpcParams rpcParams = default)
     {
         if (arrowPrefab == null) return;
 

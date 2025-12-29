@@ -111,7 +111,7 @@ public class BowAim2D : NetworkBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, z);
     }
 
-    [ServerRpc(RequireOwnership = true)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void SubmitAimServerRpc(float angleDeg)
     {
         aimAngleDeg.Value = angleDeg;

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.InputSystem;
 
 public class PlayerConnection : NetworkBehaviour
 {
@@ -17,9 +18,15 @@ public class PlayerConnection : NetworkBehaviour
         if (!IsOwner || _requestedSpawn) return;
         if (lobbyCamera == null || !lobbyCamera.gameObject.activeInHierarchy) return;
 
-        if (Input.GetMouseButtonDown(0))
+        var mouse = Mouse.current;
+        if (mouse == null) return; // no mouse device present
+
+        if (mouse.leftButton.wasPressedThisFrame)
         {
-            Vector3 world = lobbyCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 screenPos = mouse.position.ReadValue();
+
+            // ScreenToWorldPoint expects Vector3; Z is ignored for orthographic cameras
+            Vector3 world = lobbyCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
             world.z = 0f;
 
             RaycastHit2D hit = Physics2D.Raycast(world, Vector2.zero);
@@ -42,8 +49,8 @@ public class PlayerConnection : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = true)]
-    private void TryUseAltarServerRpc(ulong altarNetworkObjectId, ServerRpcParams rpcParams = default)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+    private void TryUseAltarServerRpc(ulong altarNetworkObjectId, RpcParams rpcParams = default)
     {
         ulong senderId = rpcParams.Receive.SenderClientId;
 

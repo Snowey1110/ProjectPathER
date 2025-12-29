@@ -399,11 +399,12 @@ public class Slime : NetworkBehaviour
         ApplyImpulseAwayFrom(attackerPosition, knockbackForceWhenHit);
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void OnHitByServerRpc(Vector2 attackerPosition)
     {
         ApplyImpulseAwayFrom(attackerPosition, knockbackForceWhenHit);
     }
+
 
     private void ApplyImpulseAwayFrom(Vector2 sourcePosition, float force)
     {

@@ -86,8 +86,8 @@ public class ClassAltar : NetworkBehaviour
     }
 
     // Called by PlayerConnection when clicking the altar
-    [ServerRpc(RequireOwnership = false)]
-    public void TryUseServerRpc(ServerRpcParams rpcParams = default)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void TryUseServerRpc(RpcParams rpcParams = default)
     {
         if (claimed.Value) return;
         if (hp.Value <= 0) return;

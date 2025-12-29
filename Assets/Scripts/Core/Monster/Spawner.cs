@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SlimeSpawner : NetworkBehaviour
 {
@@ -71,7 +72,7 @@ public class SlimeSpawner : NetworkBehaviour
         if (!IsServer) return;
 
         // Host-only editor testing: toggle day/night
-        if (IsHost && Input.GetKeyDown(toggleKey))
+        if (IsHost && WasKeyPressedThisFrame(toggleKey))
         {
             SetDayTime(!isDayTime.Value);
             Debug.Log($"[SlimeSpawner] Toggled DayTime -> {isDayTime.Value}");
@@ -159,6 +160,30 @@ public class SlimeSpawner : NetworkBehaviour
 
             no.Spawn(true);
         }
+    }
+
+    private static bool WasKeyPressedThisFrame(KeyCode key)
+    {
+        var kb = Keyboard.current;
+        if (kb == null) return false;
+
+        // Map only what you actually use. (You currently use F6.)
+        return key switch
+        {
+            KeyCode.F1 => kb.f1Key.wasPressedThisFrame,
+            KeyCode.F2 => kb.f2Key.wasPressedThisFrame,
+            KeyCode.F3 => kb.f3Key.wasPressedThisFrame,
+            KeyCode.F4 => kb.f4Key.wasPressedThisFrame,
+            KeyCode.F5 => kb.f5Key.wasPressedThisFrame,
+            KeyCode.F6 => kb.f6Key.wasPressedThisFrame,
+            KeyCode.F7 => kb.f7Key.wasPressedThisFrame,
+            KeyCode.F8 => kb.f8Key.wasPressedThisFrame,
+            KeyCode.F9 => kb.f9Key.wasPressedThisFrame,
+            KeyCode.F10 => kb.f10Key.wasPressedThisFrame,
+            KeyCode.F11 => kb.f11Key.wasPressedThisFrame,
+            KeyCode.F12 => kb.f12Key.wasPressedThisFrame,
+            _ => false
+        };
     }
 
 }
