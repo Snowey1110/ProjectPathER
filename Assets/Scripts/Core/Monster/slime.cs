@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class Slime : NetworkBehaviour
     [Header("AI Ranges")]
     [SerializeField] private float detectionRange = 50f;
 
-    // IMPORTANT: Jump trigger can be farther than "attack ready" range.
+    // Jump trigger can be farther than "attack ready" range.
     [SerializeField] private float jumpTriggerRange = 12f;     // start trying to attack (windup) within this
     [SerializeField] private float attackReadyRange = 8f;      // only actually start windup when this close
 
@@ -50,6 +51,20 @@ public class Slime : NetworkBehaviour
     [Header("Damage")]
     [SerializeField] private float contactDamageCooldown = 0.25f; // rate while colliding during jump
 
+    // ---------------------------
+    // Kill Rewards 
+    // ---------------------------
+
+    [Header("Kill Rewards")]
+    [SerializeField] private float rewardRadius = 8f;
+
+    [SerializeField] private int xpPerKill = 5;
+
+    [Tooltip("TEST: first slime death in the match levels up all players in rewardRadius once.")]
+    [SerializeField] private bool firstSlimeKillLevelsUp = true;
+
+    private static bool s_firstSlimeKillConsumed = false;
+
     private Transform targetPlayer;
 
     private Animator animator;
@@ -76,6 +91,9 @@ public class Slime : NetworkBehaviour
     private int _orbitSign = 1; // +1 / -1
     private float _nextOrbitSwitchTime;
 
+    // Cached stats for death hook
+    private stats _myStats;
+
     public override void OnNetworkSpawn()
     {
         animator = GetComponent<Animator>();
@@ -86,6 +104,26 @@ public class Slime : NetworkBehaviour
 
         _nextOrbitSwitchTime = Time.time + Random.Range(orbitSwitchSeconds.x, orbitSwitchSeconds.y);
         _nextOrbitPickTime = 0f;
+
+        // NEW: subscribe to stats death hook so we can reward players before despawn.
+        _myStats = GetComponent<stats>();
+        if (_myStats != null)
+            _myStats.OnDiedServer += OnSlimeDiedServer;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (IsServer && _myStats != null)
+            _myStats.OnDiedServer -= OnSlimeDiedServer;
+
+        base.OnNetworkDespawn();
+    }
+
+    private void OnDestroy()
+    {
+        // Safety: unsubscribe even if despawn path differs
+        if (_myStats != null)
+            _myStats.OnDiedServer -= OnSlimeDiedServer;
     }
 
     private void Update()
@@ -405,7 +443,6 @@ public class Slime : NetworkBehaviour
         ApplyImpulseAwayFrom(attackerPosition, knockbackForceWhenHit);
     }
 
-
     private void ApplyImpulseAwayFrom(Vector2 sourcePosition, float force)
     {
         if (rb == null) return;
@@ -416,5 +453,68 @@ public class Slime : NetworkBehaviour
         Vector2 away = ((Vector2)transform.position - sourcePosition).normalized;
         rb.linearVelocity = Vector2.zero;
         rb.AddForce(away * force, ForceMode2D.Impulse);
+    }
+
+    // ---------------------------
+    // Kill reward logic (server-side)
+    // ---------------------------
+
+    private void OnSlimeDiedServer(stats deadStats)
+    {
+        if (!IsServer) return;
+
+        RewardPlayersInArea();
+
+        // Consume the "first kill" test after we reward once.
+        if (firstSlimeKillLevelsUp && !s_firstSlimeKillConsumed)
+            s_firstSlimeKillConsumed = true;
+    }
+
+    private void RewardPlayersInArea()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, rewardRadius);
+
+        // Prevent double reward if multiple colliders belong to the same player object
+        HashSet<ulong> rewardedOwners = new HashSet<ulong>();
+
+        foreach (var h in hits)
+        {
+            if (h == null) continue;
+
+            var pc = h.GetComponentInParent<PlayerController>();
+            if (pc == null) continue;
+            if (!pc.IsSpawned) continue;
+
+            // Ignore lobby ghost
+            if (pc.Class.Value == PlayerController.PlayerClass.Ghost) continue;
+
+            var st = h.GetComponentInParent<stats>();
+            if (st == null) continue;
+
+            // Ignore dead (optional, but usually desired)
+            if (st.CurrentHP.Value <= 0) continue;
+
+            var no = st.GetComponent<NetworkObject>();
+            if (no == null || !no.IsSpawned) continue;
+
+            ulong ownerId = no.OwnerClientId;
+            if (!rewardedOwners.Add(ownerId)) continue;
+
+            // TEST: first slime death levels up everyone in range once
+            if (firstSlimeKillLevelsUp && !s_firstSlimeKillConsumed)
+            {
+                st.ServerApplyLevelUp10Percent();
+            }
+            else
+            {
+                // Requires stats.ServerAddXp(...) to exist (from the XP patch)
+                st.ServerAddXp(xpPerKill);
+            }
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireSphere(transform.position, rewardRadius);
     }
 }

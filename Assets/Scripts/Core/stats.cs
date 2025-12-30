@@ -21,6 +21,9 @@ public class stats : NetworkBehaviour
     public int skillPoints = 1;
     public float moveSpeed = 5f;
 
+    public event System.Action<stats> OnDiedServer;
+    private bool m_deathSignaled = false;
+
     [Header("Progression")]
     [SerializeField] private int abilityPointsPerLevel = 5;
 
@@ -56,6 +59,15 @@ public class stats : NetworkBehaviour
     public NetworkVariable<int> CurrentHP = new NetworkVariable<int>(
         10, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    [Header("XP (Progression)")]
+    [SerializeField] private int xpToNextDefault = 10;
+
+    public NetworkVariable<int> XP = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    public NetworkVariable<int> XPToNext = new NetworkVariable<int>(
+        10, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     public override void OnNetworkSpawn()
     {
         if (IsServer)
@@ -73,6 +85,9 @@ public class stats : NetworkBehaviour
 
             AbilityPoints.Value = Mathf.Max(0, abilityPoints);
             SkillPoints.Value = Mathf.Max(0, skillPoints);
+
+            XP.Value = 0;
+            XPToNext.Value = Mathf.Max(1, xpToNextDefault);
         }
 
         // Auto-find health bar if not assigned in inspector
@@ -257,9 +272,43 @@ public class stats : NetworkBehaviour
     {
         if (!IsServer) return;
 
+        // Fire death event once before despawn so other systems can reward/cleanup.
+        if (!m_deathSignaled)
+        {
+            m_deathSignaled = true;
+            OnDiedServer?.Invoke(this);
+        }
+
         if (NetworkObject != null && NetworkObject.IsSpawned)
             NetworkObject.Despawn(true);
         else
             Destroy(gameObject);
     }
+
+    public void ServerAddXp(int amount)
+    {
+        if (!IsServer) return;
+        if (amount <= 0) return;
+
+        XP.Value += amount;
+
+        while (XP.Value >= XPToNext.Value)
+        {
+            XP.Value -= XPToNext.Value;
+
+            // 10% stats increase level-up 
+            ServerApplyLevelUp10Percent();
+
+            XPToNext.Value = CalcXpToNext(Level.Value);
+        }
+    }
+
+    private int CalcXpToNext(int currentLevel)
+    {
+        float baseVal = Mathf.Max(1, xpToNextDefault);
+        float scaled = baseVal * Mathf.Pow(1.15f, Mathf.Max(0, currentLevel - 1));
+        return Mathf.Max(1, Mathf.CeilToInt(scaled));
+    }
+
+
 }
