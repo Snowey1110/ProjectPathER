@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -13,223 +11,104 @@ public class statsMenuController : MonoBehaviour
     public TextMeshProUGUI MPP;
     public TextMeshProUGUI SKILLPOINTS;
 
-    //Temp stats after leveling
-    private int abilityPointSpent;
     private int tempATK;
     private int tempDEF;
-    private int tempSPD;
     private int tempHPP;
     private int tempMPP;
+    private float tempSPD;
 
-    //Reset Button
-    public GameObject resetButton;
-    public GameObject confirmButton;
+    private int abilityPointSpent;
 
-
-    // Start is called before the first frame update
-    private void OnEnable()
+    private stats GetLocalPlayerStats()
     {
-        if (GameObject.FindWithTag("Player") != null)
-        {
-            loadStats();
-        }
-        else
-        {
-            Debug.LogWarning("StatsMenuController reference not set!");
-        }
+        var go = GameObject.FindWithTag("Player");
+        return go != null ? go.GetComponent<stats>() : null;
     }
 
     public void loadStats()
     {
-        if (GameObject.FindWithTag("Player") != null)
-        {
-            LEVEL.text = "Level: " + GameObject.FindWithTag("Player").GetComponent<stats>().level;
-            ATK.text = "ATK: " + GameObject.FindWithTag("Player").GetComponent<stats>().baseDamage;
-            DEF.text = "DEF: " + GameObject.FindWithTag("Player").GetComponent<stats>().defense;
-            SPD.text = "SPD: " + GameObject.FindWithTag("Player").GetComponent<PlayerController>().moveSpeed;
-            HPP.text = "HP: " + GameObject.FindWithTag("Player").GetComponent<stats>().HP;
-            MPP.text = "MP: " + GameObject.FindWithTag("Player").GetComponent<stats>().mana;
-            SKILLPOINTS.text = "Ability Points remaining: : " + GameObject.FindWithTag("Player").GetComponent<stats>().abilityPoints;
-        }
+        var playerStats = GetLocalPlayerStats();
+        if (playerStats == null) return;
 
+        int abilityLeft = Mathf.Max(0, playerStats.AbilityPoints.Value - abilityPointSpent);
+
+        LEVEL.text = $"Level: {playerStats.Level.Value}";
+        ATK.text = $"ATK: {playerStats.Damage.Value + tempATK}";
+        DEF.text = $"DEF: {playerStats.Defense.Value + tempDEF}";
+        SPD.text = $"SPD: {playerStats.MoveSpeed.Value + tempSPD}";
+        HPP.text = $"HP: {playerStats.MaxHP.Value + tempHPP}";
+        MPP.text = $"MP: {playerStats.Mana.Value + tempMPP}";
+        SKILLPOINTS.text = $"Ability Points remaining: {abilityLeft}";
     }
 
-    public void levelStatsByOne(string statType)
+    public void levelStatsByOne(string statType) => ApplyPreviewUpgrade(statType, step: 1, cost: 1);
+    public void levelStatsByTen(string statType) => ApplyPreviewUpgrade(statType, step: 10, cost: 10);
+
+    private void ApplyPreviewUpgrade(string statType, int step, int cost)
     {
-        var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
+        var playerStats = GetLocalPlayerStats();
+        if (playerStats == null) return;
 
-        if ((playerStats == null) || (playerMovements ==null))
+        int available = playerStats.AbilityPoints.Value - abilityPointSpent;
+        if (available < cost) return;
+
+        switch (statType)
         {
-            Debug.LogError("Cannot find the Player's stats component");
-            return;
+            case "ATK": tempATK += step; break;
+            case "DEF": tempDEF += step; break;
+            case "SPD": tempSPD += step; break;
+            case "HPP": tempHPP += step; break;
+            case "MPP": tempMPP += step; break;
+            default:
+                Debug.LogError("Unexpected statType: " + statType);
+                return;
         }
 
-        if (playerStats.abilityPoints >= 1)
-        {
-            switch (statType)
-            {
-                case "ATK":
-                    tempATK += 1;
-                    playerStats.baseDamage += 1;
-                    break;
-                case "DEF":
-                    tempDEF += 1;
-                    playerStats.defense += 1;
-                    break;
-                case "SPD":
-                    tempSPD += 1;
-                    playerMovements.moveSpeed += 1;
-                    break;
-                case "HPP":
-                    tempHPP += 1;
-                    playerStats.HP += 1;
-                    playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
-                    break;
-                case "MPP":
-                    tempMPP += 1;
-                    playerStats.mana += 1;
-                    break;
-                default:
-                    Debug.LogError("Invalid stat type: " + statType);
-                    return;
-            }
-            playerStats.abilityPoints -= 1;
-            abilityPointSpent += 1;
-            loadStats();
-        }
-    }
-
-    public void levelStatsByTen(string statType)
-    {
-        var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
-
-        if (playerStats == null)
-        {
-            Debug.LogError("Cannot find the Player's stats component");
-            return;
-        }
-
-        if (playerStats.abilityPoints >= 10)
-        {
-            switch (statType)
-            {
-                case "ATK":
-                    tempATK += 10;
-                    playerStats.baseDamage += 10;
-                    break;
-                case "DEF":
-                    tempDEF += 10;
-                    playerStats.defense += 10;
-                    break;
-                case "SPD":
-                    tempSPD += 10;
-                    playerMovements.moveSpeed += 10;
-                    break;
-                case "HPP":
-                    tempHPP += 10;
-                    playerStats.HP += 10;
-                    playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
-                    break;
-                case "MPP":
-                    tempMPP += 10;
-                    playerStats.mana += 10;
-                    break;
-                default:
-                    Debug.LogError("Invalid stat type: " + statType);
-                    return;
-            }
-            abilityPointSpent += 10;
-            playerStats.abilityPoints -= 10;
-            loadStats();
-        }
-    }
-
-    //Reset Ability Points after spending
-    public void resetAbilityPoints()
-    {
-        var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
-        playerStats.abilityPoints += abilityPointSpent;
-        abilityPointSpent = 0;
-        playerStats.baseDamage -= tempATK;
-        tempATK = 0;
-        playerStats.HP -= tempHPP;
-        tempHPP = 0;
-        playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
-        playerStats.mana -= tempMPP;
-        tempMPP = 0;
-        playerStats.defense -= tempDEF;
-        tempDEF = 0;
-        playerMovements.moveSpeed -= tempSPD;
-        tempSPD = 0;
+        abilityPointSpent += cost;
         loadStats();
     }
 
-    //Confirm ability points spent
-    public void confirmAbilityPointSpent()
+    public void cancelAbilityPointSpent()
     {
         tempATK = 0;
+        tempDEF = 0;
         tempHPP = 0;
         tempMPP = 0;
-        tempDEF = 0;
-        tempSPD = 0;
+        tempSPD = 0f;
         abilityPointSpent = 0;
+        loadStats();
+    }
+
+    public void confirmAbilityPointSpent()
+    {
+        var playerStats = GetLocalPlayerStats();
+        if (playerStats == null) return;
+        if (abilityPointSpent <= 0) return;
+
+        playerStats.SpendAbilityPointsServerRpc(
+            deltaDamage: tempATK,
+            deltaDefense: tempDEF,
+            deltaMaxHp: tempHPP,
+            deltaMana: tempMPP,
+            deltaMoveSpeed: tempSPD,
+            cost: abilityPointSpent);
+
+        tempATK = 0;
+        tempDEF = 0;
+        tempHPP = 0;
+        tempMPP = 0;
+        tempSPD = 0f;
+        abilityPointSpent = 0;
+
         loadStats();
     }
 
     public void levelUp()
     {
-        var playerStats = GameObject.FindWithTag("Player")?.GetComponent<stats>();
-        if (playerStats == null)
-        {
-            Debug.LogError("Cannot find the Player's stats component");
-            return;
-        }
+        var playerStats = GetLocalPlayerStats();
+        if (playerStats == null) return;
 
-
-        //Randomly adds stats temp to the player
-        int randomStat = Random.Range(0, 5);
-
-        switch (randomStat)
-        {
-            case 0:
-                tempATK += 1;
-                playerStats.baseDamage += 1;
-                break;
-            case 1:
-                tempDEF += 1;
-                playerStats.defense += 1;
-                break;
-            case 2:
-                tempSPD += 1;
-                var playerMovements = GameObject.FindWithTag("Player")?.GetComponent<PlayerController>();
-                if (playerMovements != null)
-                {
-                    playerMovements.moveSpeed += 1;
-                }
-                break;
-            case 3:
-                tempHPP += 1;
-                playerStats.HP += 1;
-                playerStats.healthBar.SetMaxHealth(playerStats.MaxHP.Value, playerStats.CurrentHP.Value);
-                break;
-            case 4:
-                tempMPP += 1;
-                playerStats.mana += 1;
-                break;
-            default:
-                Debug.LogError("Unexpected randomStat: " + randomStat);
-                return;
-        }
-        //Regen player to full HP
-        playerStats.CurrentHP.Value = playerStats.HP; 
-        playerStats.healthBar.SetHealth(-1); 
-
-        playerStats.abilityPoints += 5; //Give 5 ability points on leveling
-        playerStats.level += 1; //Levels the player up
+        playerStats.RequestLevelUpServerRpc();
         loadStats();
     }
-
 }

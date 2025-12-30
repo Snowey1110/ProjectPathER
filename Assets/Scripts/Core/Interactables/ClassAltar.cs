@@ -18,32 +18,52 @@ public class ClassAltar : NetworkBehaviour
     [Tooltip("If true, altar regens only after it has been claimed (spawned once).")]
     [SerializeField] private bool regenOnlyWhenClaimed = false;
 
-    [Header("On Destruction")]
-    [Tooltip("If true, destroying the altar frees the class (allows another altar or respawn system to re-offer it).")]
+    [Tooltip("If true, destroying this altar frees its class in LobbyManager (unique-classes rule).")]
     [SerializeField] private bool freeClassWhenDestroyed = false;
 
-    [Header("Visuals")]
-    [SerializeField] private GameObject occupiedVisual;   // shown when claimed/empty
-    [SerializeField] private GameObject availableVisual;  // shown when available
+    [Header("Visuals (optional)")]
+    [SerializeField] private GameObject availableVisual;
+    [SerializeField] private GameObject occupiedVisual;
 
-    // State replicated to all clients
     private readonly NetworkVariable<bool> claimed = new NetworkVariable<bool>(
-        false,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server);
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private readonly NetworkVariable<int> hp = new NetworkVariable<int>(
-        0,
-        NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server);
+        100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    // Saved progression (persisted on server in the altar when a player disconnects)
+    private readonly NetworkVariable<bool> hasSavedProgress = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedLevel = new NetworkVariable<int>(
+        1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedMaxHp = new NetworkVariable<int>(
+        10, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedDamage = new NetworkVariable<int>(
+        1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedDefense = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedMana = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<float> savedMoveSpeed = new NetworkVariable<float>(
+        5f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedAbilityPoints = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<int> savedSkillPoints = new NetworkVariable<int>(
+        1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private float lastDamageTime;
-    private float regenAccumulator; // fixes FloorToInt regen stalling
+    private float regenAccumulator;
 
-    // Optional accessors for UI/other scripts
     public bool IsClaimed => claimed.Value;
-    public int HP => hp.Value;
-    public int MaxHP => maxHp;
+    public bool HasSavedProgress => hasSavedProgress.Value;
 
     public override void OnNetworkSpawn()
     {
@@ -61,7 +81,6 @@ public class ClassAltar : NetworkBehaviour
     private void ApplyVisuals()
     {
         bool isClaimed = claimed.Value;
-
         if (availableVisual != null) availableVisual.SetActive(!isClaimed);
         if (occupiedVisual != null) occupiedVisual.SetActive(isClaimed);
     }
@@ -72,20 +91,17 @@ public class ClassAltar : NetworkBehaviour
         if (hp.Value <= 0) return;
 
         if (regenOnlyWhenClaimed && !claimed.Value) return;
-
         if (Time.time - lastDamageTime < regenDelaySeconds) return;
         if (hp.Value >= maxHp) return;
 
         regenAccumulator += regenPerSecond * Time.deltaTime;
+        if (regenAccumulator < 1f) return;
 
         int add = Mathf.FloorToInt(regenAccumulator);
-        if (add <= 0) return;
-
         regenAccumulator -= add;
         hp.Value = Mathf.Min(maxHp, hp.Value + add);
     }
 
-    // Called by PlayerConnection when clicking the altar
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void TryUseServerRpc(RpcParams rpcParams = default)
     {
@@ -93,17 +109,14 @@ public class ClassAltar : NetworkBehaviour
         if (hp.Value <= 0) return;
 
         ulong sender = rpcParams.Receive.SenderClientId;
-
         if (LobbyManager.Instance == null) return;
 
-        bool ok = LobbyManager.Instance.TrySpawnCharacter(sender, classType);
+        bool ok = LobbyManager.Instance.TrySpawnCharacterFromAltar(sender, classType, this);
         if (!ok) return;
 
         claimed.Value = true;
-        // visuals update automatically via NetworkVariable change
     }
 
-    // Call this from weapons/attacks on the server
     public void ServerTakeDamage(int dmg)
     {
         if (!IsServer) return;
@@ -117,10 +130,7 @@ public class ClassAltar : NetworkBehaviour
         if (hp.Value == 0)
         {
             if (freeClassWhenDestroyed && LobbyManager.Instance != null)
-            {
-                // Only meaningful if you implement ReleaseClass in LobbyManager (see note below).
                 LobbyManager.Instance.ReleaseClass(classType);
-            }
 
             if (NetworkObject != null && NetworkObject.IsSpawned)
                 NetworkObject.Despawn(true);
@@ -133,14 +143,56 @@ public class ClassAltar : NetworkBehaviour
 
         if (claimed.Value) return false;
         if (hp.Value <= 0) return false;
-
         if (LobbyManager.Instance == null) return false;
 
-        bool ok = LobbyManager.Instance.TrySpawnCharacter(senderClientId, classType);
+        bool ok = LobbyManager.Instance.TrySpawnCharacterFromAltar(senderClientId, classType, this);
         if (!ok) return false;
 
         claimed.Value = true;
         return true;
     }
 
+    // ---------------------------
+    // Progress persistence
+    // ---------------------------
+
+    public void ServerSaveProgressFromStats(stats st)
+    {
+        if (!IsServer) return;
+        if (st == null) return;
+
+        hasSavedProgress.Value = true;
+        savedLevel.Value = st.Level.Value;
+        savedMaxHp.Value = st.MaxHP.Value;
+        savedDamage.Value = st.Damage.Value;
+        savedDefense.Value = st.Defense.Value;
+        savedMana.Value = st.Mana.Value;
+        savedMoveSpeed.Value = st.MoveSpeed.Value;
+        savedAbilityPoints.Value = st.AbilityPoints.Value;
+        savedSkillPoints.Value = st.SkillPoints.Value;
+    }
+
+    public void ServerApplySavedProgressToStats(stats st, bool fillHp)
+    {
+        if (!IsServer) return;
+        if (st == null) return;
+        if (!hasSavedProgress.Value) return;
+
+        st.ServerApplySnapshot(
+            savedLevel.Value,
+            savedMaxHp.Value,
+            savedDamage.Value,
+            savedDefense.Value,
+            savedMana.Value,
+            savedMoveSpeed.Value,
+            savedAbilityPoints.Value,
+            savedSkillPoints.Value,
+            fillHp);
+    }
+
+    public void ServerUnclaim()
+    {
+        if (!IsServer) return;
+        claimed.Value = false;
+    }
 }

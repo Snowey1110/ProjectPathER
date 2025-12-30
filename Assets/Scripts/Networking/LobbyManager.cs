@@ -20,17 +20,15 @@ public class LobbyManager : NetworkBehaviour
     [Tooltip("If true: each class can only be spawned once (one altar = one class forever unless freed manually).")]
     [SerializeField] private bool enforceUniqueClasses = true;
 
-    [Tooltip("If true: when a client disconnects, their character despawns and their class becomes available again.")]
+    [Tooltip("Legacy toggle. Disconnect now also frees the altar by default; this flag only controls whether classTaken is cleared when no altar is known.")]
     [SerializeField] private bool freeClassOnDisconnect = false;
 
-    // classType -> taken?
     private readonly Dictionary<ClassType, bool> classTaken = new Dictionary<ClassType, bool>();
-
-    // clientId -> spawned character NetworkObject
     private readonly Dictionary<ulong, NetworkObject> clientCharacter = new Dictionary<ulong, NetworkObject>();
-
-    // clientId -> chosen class (only used if you want to free on disconnect)
     private readonly Dictionary<ulong, ClassType> clientClass = new Dictionary<ulong, ClassType>();
+
+    // clientId -> altar used to spawn (if spawned via an altar)
+    private readonly Dictionary<ulong, ClassAltar> clientAltar = new Dictionary<ulong, ClassAltar>();
 
     private void Awake()
     {
@@ -69,25 +67,32 @@ public class LobbyManager : NetworkBehaviour
         return !taken;
     }
 
-    /// <summary>
-    /// Server-only. Spawns the character for clientId if allowed. Returns true on success.
-    /// </summary>
     public bool TrySpawnCharacter(ulong clientId, ClassType type)
     {
+        return TrySpawnCharacterInternal(clientId, type, null, out _);
+    }
+
+    public bool TrySpawnCharacterFromAltar(ulong clientId, ClassType type, ClassAltar altar)
+    {
+        return TrySpawnCharacterInternal(clientId, type, altar, out _);
+    }
+
+    private bool TrySpawnCharacterInternal(ulong clientId, ClassType type, ClassAltar altar, out NetworkObject spawned)
+    {
+        spawned = null;
+
         if (!IsServer)
         {
             Debug.LogWarning("[LobbyManager] TrySpawnCharacter called on client. This must run on server.");
             return false;
         }
 
-        // One character per client
         if (clientCharacter.ContainsKey(clientId))
         {
             Debug.LogWarning($"[LobbyManager] Client {clientId} already spawned a character.");
             return false;
         }
 
-        // One class per match (if enabled)
         if (enforceUniqueClasses && !IsClassAvailable(type))
         {
             Debug.LogWarning($"[LobbyManager] Class {type} already taken.");
@@ -105,7 +110,6 @@ public class LobbyManager : NetworkBehaviour
         spawnPos.z = 0f;
         GameObject go = Instantiate(prefab, spawnPos, Quaternion.identity);
 
-
         NetworkObject no = go.GetComponent<NetworkObject>();
         if (no == null)
         {
@@ -114,21 +118,30 @@ public class LobbyManager : NetworkBehaviour
             return false;
         }
 
-        // Give ownership to this client
         no.SpawnWithOwnership(clientId, true);
 
+        spawned = no;
         clientCharacter[clientId] = no;
         clientClass[clientId] = type;
 
         if (enforceUniqueClasses)
             classTaken[type] = true;
 
+        if (altar != null)
+        {
+            clientAltar[clientId] = altar;
+
+            if (altar.HasSavedProgress)
+            {
+                var st = no.GetComponent<stats>();
+                if (st != null)
+                    altar.ServerApplySavedProgressToStats(st, fillHp: true);
+            }
+        }
+
         return true;
     }
 
-    /// <summary>
-    /// Backward-compatible wrapper if your older code calls SpawnCharacter().
-    /// </summary>
     public void SpawnCharacter(ulong clientId, ClassType type)
     {
         TrySpawnCharacter(clientId, type);
@@ -138,19 +151,37 @@ public class LobbyManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // Despawn the player's character if it exists
-        if (clientCharacter.TryGetValue(clientId, out NetworkObject no) && no != null && no.IsSpawned)
+        // Save stats into the altar and free the altar if this client spawned from one.
+        if (clientCharacter.TryGetValue(clientId, out NetworkObject no) && no != null)
         {
-            no.Despawn(true);
+            if (clientAltar.TryGetValue(clientId, out ClassAltar altar) && altar != null)
+            {
+                var st = no.GetComponent<stats>();
+                if (st != null)
+                    altar.ServerSaveProgressFromStats(st);
+
+                altar.ServerUnclaim();
+            }
         }
+
+        // Despawn character
+        if (clientCharacter.TryGetValue(clientId, out NetworkObject spawnedNo) && spawnedNo != null && spawnedNo.IsSpawned)
+            spawnedNo.Despawn(true);
+
         clientCharacter.Remove(clientId);
 
-        // Optionally free the class if you want to allow re-picking when someone leaves
-        if (freeClassOnDisconnect && clientClass.TryGetValue(clientId, out ClassType type))
+        // Free class when disconnecting if:
+        // - spawned from an altar (so the altar can be reused), OR
+        // - legacy flag is enabled.
+        if (clientClass.TryGetValue(clientId, out ClassType type))
         {
-            classTaken[type] = false;
+            bool shouldFree = clientAltar.ContainsKey(clientId) || freeClassOnDisconnect;
+            if (shouldFree && enforceUniqueClasses)
+                classTaken[type] = false;
         }
+
         clientClass.Remove(clientId);
+        clientAltar.Remove(clientId);
     }
 
     private GameObject GetPrefab(ClassType type)
@@ -173,16 +204,14 @@ public class LobbyManager : NetworkBehaviour
             if (spawnPoints[idx] != null)
             {
                 Vector3 p = spawnPoints[idx].position;
-                p.z = 0f; // FORCE spawn point Z=0
+                p.z = 0f;
                 return p;
             }
         }
 
-        // Fallback: spread along X at Z=0
         int slot = (int)(clientId % 8);
         return new Vector3(slot * 3.0f, 0f, 0f);
     }
-
 
     public void ReleaseClass(ClassType type)
     {
@@ -192,5 +221,4 @@ public class LobbyManager : NetworkBehaviour
         if (classTaken.ContainsKey(type))
             classTaken[type] = false;
     }
-
 }

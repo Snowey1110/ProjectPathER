@@ -245,9 +245,16 @@ public class PlayerController : NetworkBehaviour
 
     void FixedUpdate()
     {
+        if (IsOwner)
+        {
+            var st = GetComponent<stats>();
+            if (st != null) moveSpeed = st.MoveSpeed.Value;
+        }
+
         if (IsOwner && inputActive && rb != null)
             rb.linearVelocity = moveInput * moveSpeed;
     }
+
 
     // Owner computes facing from mouse and syncs to server
     void HandleRotationOwnerAndSyncFacing()

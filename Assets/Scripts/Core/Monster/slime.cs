@@ -379,14 +379,14 @@ public class Slime : NetworkBehaviour
         stats slimeStats = GetComponent<stats>();
 
         if (playerStats != null && slimeStats != null)
-            playerStats.takeDamage(slimeStats.baseDamage);
+            playerStats.takeDamage(slimeStats.Damage.Value);
 
         // Knockback slime away from player after a successful hit
         ApplyImpulseAwayFrom(pc.transform.position, baseKnockbackForceOnHitPlayer);
     }
 
-    /// Call this when the player hits the slime (melee/projectile). Must run on server to replicate.
-    /// Recommended usage: from your server-side damage code, call slime.OnHitBy(attackerPosition).
+    // Call this when the player hits the slime (melee/projectile). Must run on server to replicate.
+    // Recommended usage: from your server-side damage code, call slime.OnHitBy(attackerPosition).
     public void OnHitBy(Vector2 attackerPosition)
     {
         if (!IsServer)

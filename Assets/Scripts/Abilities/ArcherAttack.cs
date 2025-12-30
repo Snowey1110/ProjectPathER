@@ -71,7 +71,7 @@ public class ArcherAttack : BaseAttack
         // Damage from shooter stats
         int dmg = 1;
         var shooterStats = shooterNo.GetComponent<stats>();
-        if (shooterStats != null) dmg = shooterStats.baseDamage;
+        if (shooterStats != null) dmg = shooterStats.Damage.Value;
 
         // Friendly fire from PlayerController (server authoritative)
         bool ff = false;
