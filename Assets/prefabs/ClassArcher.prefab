@@ -167,7 +167,7 @@ SpriteRenderer:
   m_Size: {x: 2.02, y: 2.02}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!114 &6664443846984006125
 MonoBehaviour:
@@ -782,7 +782,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3399499949
+  GlobalObjectIdHash: 3316762627
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -845,9 +845,30 @@ MonoBehaviour:
   level: 0
   abilityPoints: 11
   skillPoints: 2
+  moveSpeed: 5
+  abilityPointsPerLevel: 5
+  Level:
+    m_InternalValue: 1
+  Damage:
+    m_InternalValue: 1
+  Defense:
+    m_InternalValue: 0
+  Mana:
+    m_InternalValue: 0
+  MoveSpeed:
+    m_InternalValue: 5
+  AbilityPoints:
+    m_InternalValue: 0
+  SkillPoints:
+    m_InternalValue: 1
   MaxHP:
     m_InternalValue: 10
   CurrentHP:
+    m_InternalValue: 10
+  xpToNextDefault: 10
+  XP:
+    m_InternalValue: 0
+  XPToNext:
     m_InternalValue: 10
 --- !u!95 &5161156361555879160
 Animator:
@@ -1028,7 +1049,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   attackRate: 0.5
   arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
-  arrowSpeed: 20
+  arrowSpeed: 40
   extraSpawnPadding: 0.2
 --- !u!114 &1238352054297935531
 MonoBehaviour:
