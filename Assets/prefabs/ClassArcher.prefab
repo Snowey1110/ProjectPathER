@@ -782,7 +782,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3316762627
+  GlobalObjectIdHash: 3399499949
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -810,8 +810,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   defaultFriendlyFire: 1
   walkSpeedParam: WalkSpeed
-  bowNetAnimator: {fileID: 8228283866883253546}
-  bowShootTrigger: Shoot
   FriendlyFire:
     m_InternalValue: 0
   Class:
@@ -1051,6 +1049,12 @@ MonoBehaviour:
   arrowPrefab: {fileID: 1367231860931543330, guid: 202e011ae17d3924eb6153f332fe1824, type: 3}
   arrowSpeed: 40
   extraSpawnPadding: 0.2
+  bodyAttackTrigger: attack
+  bowShootTrigger: Shoot
+  bowShootClipName: BowShoot
+  bowSpeedMultParam: SpeedMult
+  minSpeedMult: 0.05
+  maxSpeedMult: 20
 --- !u!114 &1238352054297935531
 MonoBehaviour:
   m_ObjectHideFlags: 0

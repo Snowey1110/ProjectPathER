@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class ArcherAttack : BaseAttack
@@ -7,17 +8,133 @@ public class ArcherAttack : BaseAttack
     [SerializeField] private float arrowSpeed = 20f;
     [SerializeField] private float extraSpawnPadding = 0.20f;
 
-    public override void Fire(Vector2 direction)
+    [Header("Animation (Archer-specific)")]
+    [Tooltip("Body attack trigger on the character Animator/NetworkAnimator.")]
+    [SerializeField] private string bodyAttackTrigger = "attack";
+
+    [Tooltip("Bow shoot trigger on the Bow Animator/NetworkAnimator.")]
+    [SerializeField] private string bowShootTrigger = "Shoot";
+
+    [Tooltip("Bow shoot state name (used to look up clip length).")]
+    [SerializeField] private string bowShootClipName = "BowShoot";
+
+    [Tooltip("Float parameter on Bow Animator that scales the BowShoot state's speed (added to Bow.controller in this patch).")]
+    [SerializeField] private string bowSpeedMultParam = "SpeedMult";
+
+    [SerializeField] private float minSpeedMult = 0.05f;
+    [SerializeField] private float maxSpeedMult = 20f;
+
+    // Cached (auto-discovered to avoid coupling PlayerController to Archer)
+    private ClientNetworkAnimator m_bodyNetAnimator;
+    private Animator m_bowAnimator;
+    private NetworkAnimator m_bowNetAnimator;
+    private float m_bowShootClipLen = -1f;
+
+    private void Awake()
     {
-        if (!IsOwner) return;
+        // Body animator is on the root (client-authoritative in this project)
+        if (m_bodyNetAnimator == null)
+            m_bodyNetAnimator = GetComponent<ClientNetworkAnimator>();
 
-        if (Time.time < nextAttackTime) return;
-        nextAttackTime = Time.time + attackRate;
+        // Bow animator + bow NetworkAnimator live on the Bow child object.
+        // (Auto-discovery keeps PlayerController class-agnostic.)
+        if (m_bowAnimator == null)
+        {
+            var anims = GetComponentsInChildren<Animator>(true);
+            foreach (var a in anims)
+            {
+                if (a != null && a.runtimeAnimatorController != null && a.runtimeAnimatorController.name == "Bow")
+                {
+                    m_bowAnimator = a;
+                    break;
+                }
+            }
+        }
 
-        if (direction.sqrMagnitude < 0.0001f) return;
+        if (m_bowNetAnimator == null)
+        {
+            var netAnims = GetComponentsInChildren<NetworkAnimator>(true);
+            foreach (var na in netAnims)
+            {
+                if (na != null && na.Animator != null && na.Animator.runtimeAnimatorController != null && na.Animator.runtimeAnimatorController.name == "Bow")
+                {
+                    m_bowNetAnimator = na;
+                    break;
+                }
+            }
+        }
+
+        CacheBowShootClipLen();
+    }
+
+    public override bool TryFire(Vector2 direction)
+    {
+        if (!IsOwner) return false;
+
+        // Cooldown gating.
+        if (Time.time < nextAttackTime) return false;
+
+        if (direction.sqrMagnitude < 0.0001f) return false;
         direction.Normalize();
 
+        nextAttackTime = Time.time + attackRate;
+
+        // Local visuals (and network-synced triggers via NetworkAnimator)
+        PlayAttackVisuals();
+
+        // Gameplay
         SpawnArrowRpc(direction, NetworkObjectId);
+        return true;
+    }
+
+    private void CacheBowShootClipLen()
+    {
+        if (m_bowShootClipLen > 0f) return;
+        if (m_bowAnimator == null) return;
+        if (m_bowAnimator.runtimeAnimatorController == null) return;
+
+        foreach (var clip in m_bowAnimator.runtimeAnimatorController.animationClips)
+        {
+            if (clip != null && clip.name == bowShootClipName)
+            {
+                m_bowShootClipLen = Mathf.Max(0.0001f, clip.length);
+                return;
+            }
+        }
+
+        // Fallback: unknown, leave as -1.
+        m_bowShootClipLen = -1f;
+    }
+
+    private void PlayAttackVisuals()
+    {
+        // Body swing / recoil
+        if (m_bodyNetAnimator != null)
+            m_bodyNetAnimator.SetTrigger(bodyAttackTrigger);
+        else
+            GetComponent<Animator>()?.SetTrigger(bodyAttackTrigger);
+
+        // Bow shoot + reload should match fire rate.
+        // We scale the BowShoot state speed so its full duration == attackRate.
+        if (m_bowAnimator != null)
+        {
+            CacheBowShootClipLen();
+
+            if (m_bowShootClipLen > 0f && attackRate > 0.0001f)
+            {
+                float speedMult = m_bowShootClipLen / attackRate;
+                speedMult = Mathf.Clamp(speedMult, minSpeedMult, maxSpeedMult);
+                m_bowAnimator.SetFloat(bowSpeedMultParam, speedMult);
+            }
+        }
+
+        // Trigger the bow animation.
+        // NOTE: Bow.controller is patched to include an AnyState->BowShoot transition on "Shoot",
+        // so repeated shots re-enter BowShoot from the first frame even if currently reloading.
+        if (m_bowNetAnimator != null)
+            m_bowNetAnimator.SetTrigger(bowShootTrigger);
+        else
+            m_bowAnimator?.SetTrigger(bowShootTrigger);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

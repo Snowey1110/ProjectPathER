@@ -24,12 +24,8 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private string walkSpeedParam = "WalkSpeedMult";
     private const float WALK_SPEED_DIVISOR = 8.0f;
 
-    [Header("Bow Animation")]
-    [SerializeField] private Unity.Netcode.Components.NetworkAnimator bowNetAnimator;
-    [SerializeField] private string bowShootTrigger = "Shoot";
-
-
-
+    // Archer-specific bow animation logic has been moved into ArcherAttack.
+    // Keeping PlayerController class-agnostic makes it easier to create Knight/Mage/Healer.
 
     // Server-authoritative replicated settings
     public NetworkVariable<bool> FriendlyFire = new NetworkVariable<bool>(
@@ -187,15 +183,10 @@ public class PlayerController : NetworkBehaviour
         if (_localCamera == null) return;
 
         Vector2 mousePos = _localCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        Vector2 direction = (mousePos - (Vector2)transform.position).normalized;
+        Vector2 direction = mousePos - (Vector2)transform.position;
 
-        primaryAttack.Fire(direction);
-
-        if (animator != null) animator.SetTrigger("attack");
-
-        if (bowNetAnimator != null)
-            bowNetAnimator.SetTrigger(bowShootTrigger);
-
+        // Only fire/animate when the attack actually occurs (cooldown passed, valid direction).
+        primaryAttack.TryFire(direction);
     }
 
     private void InitializeAbilities()
