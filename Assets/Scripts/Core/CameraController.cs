@@ -6,6 +6,10 @@ public class CameraController : MonoBehaviour
     [Header("Target")]
     public Transform player; // Automatically assigned by PlayerController
 
+    [Header("Lifecycle")]
+    [Tooltip("If true, this camera will detach from its parent at runtime (legacy behavior).\n\nKeep this OFF for player-class cameras so the camera is destroyed correctly when the owning NetworkObject despawns.")]
+    public bool detachFromParent = false;
+
     [Header("Settings")]
     public float panSpeed = 200f;
     public float panBorderThickness = 10f;
@@ -62,9 +66,11 @@ public class CameraController : MonoBehaviour
         cam = GetComponent<Camera>();
         targetZoom = cam.orthographicSize;
 
-        // CRITICAL: If this camera is a child of the Player prefab,
-        // we must detach it so it can move independently!
-        transform.parent = null;
+        // Legacy behavior detached the camera from the player prefab so it could pan independently.
+        // In a Netcode setup this causes orphaned cameras when the character despawns.
+        // Only detach if explicitly requested.
+        if (detachFromParent)
+            transform.parent = null;
     }
 
     void LateUpdate()
