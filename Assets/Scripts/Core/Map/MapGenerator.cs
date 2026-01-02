@@ -37,7 +37,7 @@ public class MapGenerator : MonoBehaviour
 	{
 		MapData mapData = GenerateMapData();
 
-		MapDisplay display = FindObjectOfType<MapDisplay>();
+		MapDisplay display = FindFirstObjectByType<MapDisplay>();
 		if (drawMode == DrawMode.NoiseMap)
 		{
 			display.DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightMap));

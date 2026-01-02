@@ -19,7 +19,7 @@ public class EndlessTerrain : MonoBehaviour
 
 	void Start()
 	{
-		mapGenerator = FindObjectOfType<MapGenerator>();
+		mapGenerator = FindFirstObjectByType<MapGenerator>();
 		chunkSize = MapGenerator.mapChunkSize - 1;
 		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
 	}

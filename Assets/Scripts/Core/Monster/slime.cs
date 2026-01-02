@@ -118,12 +118,14 @@ public class Slime : NetworkBehaviour
 
         base.OnNetworkDespawn();
     }
-
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         // Safety: unsubscribe even if despawn path differs
         if (_myStats != null)
             _myStats.OnDiedServer -= OnSlimeDiedServer;
+
+        // Netcode for GameObjects recommends invoking the base implementation.
+        base.OnDestroy();
     }
 
     private void Update()
@@ -298,7 +300,7 @@ public class Slime : NetworkBehaviour
             bool jumping = animator != null && animator.GetBool("jumping");
             float dist = Vector2.Distance(transform.position, targetPlayer.position);
 
-            // Abort windup if we’re no longer ready
+            // Abort windup if we are no longer ready
             if (jumping) { _windupRoutine = null; yield break; }
             if (jumpCD) { _windupRoutine = null; yield break; }
             if (dist > attackReadyRange) { _windupRoutine = null; yield break; }
