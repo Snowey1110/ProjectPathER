@@ -1,4 +1,3 @@
-using Unity.Netcode.Components;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -30,16 +29,15 @@ public class ArcherAttack : BaseAttack
     [SerializeField] private bool enablePercentHpBonus = true;
 
     // Cached (auto-discovered to avoid coupling PlayerController to Archer)
-    private ClientNetworkAnimator m_bodyNetAnimator;
+    private Animator m_bodyAnimator;
     private Animator m_bowAnimator;
-    private NetworkAnimator m_bowNetAnimator;
     private float m_bowShootClipLen = -1f;
 
     private void Awake()
     {
         // Body animator is on the root
-        if (m_bodyNetAnimator == null)
-            m_bodyNetAnimator = GetComponent<ClientNetworkAnimator>();
+        if (m_bodyAnimator == null)
+            m_bodyAnimator = GetComponent<Animator>();
 
         // Bow animator + bow NetworkAnimator live on the Bow child object.
         if (m_bowAnimator == null)
@@ -50,19 +48,6 @@ public class ArcherAttack : BaseAttack
                 if (a != null && a.runtimeAnimatorController != null && a.runtimeAnimatorController.name == "Bow")
                 {
                     m_bowAnimator = a;
-                    break;
-                }
-            }
-        }
-
-        if (m_bowNetAnimator == null)
-        {
-            var netAnims = GetComponentsInChildren<NetworkAnimator>(true);
-            foreach (var na in netAnims)
-            {
-                if (na != null && na.Animator != null && na.Animator.runtimeAnimatorController != null && na.Animator.runtimeAnimatorController.name == "Bow")
-                {
-                    m_bowNetAnimator = na;
                     break;
                 }
             }
@@ -112,10 +97,7 @@ public class ArcherAttack : BaseAttack
     private void PlayAttackVisuals()
     {
         // Body attack
-        if (m_bodyNetAnimator != null)
-            m_bodyNetAnimator.SetTrigger(bodyAttackTrigger);
-        else
-            GetComponent<Animator>()?.SetTrigger(bodyAttackTrigger);
+        m_bodyAnimator?.SetTrigger(bodyAttackTrigger);
 
         // Bow shoot + reload should match fire rate.
         if (m_bowAnimator != null)
@@ -130,11 +112,45 @@ public class ArcherAttack : BaseAttack
             }
         }
 
-        // Trigger bow animation (controller has AnyState->BowShoot on this trigger so it restarts from frame 0)
-        if (m_bowNetAnimator != null)
-            m_bowNetAnimator.SetTrigger(bowShootTrigger);
-        else
-            m_bowAnimator?.SetTrigger(bowShootTrigger);
+        // Trigger bow animation locally (controller has AnyState->BowShoot on this trigger so it restarts from frame 0)
+        m_bowAnimator?.SetTrigger(bowShootTrigger);
+
+        // Also notify other clients to play the same bow shot visuals (Steam/Netcode-safe: no NetworkAnimator dependency).
+        if (IsOwner)
+        {
+            float speedMult = 1f;
+            if (m_bowAnimator != null)
+                speedMult = m_bowAnimator.GetFloat(bowSpeedMultParam);
+            BowShotVisualsServerRpc(speedMult);
+        }
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+    private void BowShotVisualsServerRpc(float bowSpeedMult, RpcParams rpcParams = default)
+    {
+        // Broadcast to all clients (including host). Owner will early-out in the ClientRpc.
+        BowShotVisualsClientRpc(bowSpeedMult);
+    }
+
+    [ClientRpc]
+    private void BowShotVisualsClientRpc(float bowSpeedMult, ClientRpcParams clientRpcParams = default)
+    {
+        // Play on non-owner clients.
+        if (IsOwner) return;
+
+        if (m_bowAnimator == null)
+            Awake(); // best-effort cache; safe to call once or twice
+
+        if (m_bowAnimator != null)
+        {
+            m_bowAnimator.SetFloat(bowSpeedMultParam, bowSpeedMult);
+            m_bowAnimator.SetTrigger(bowShootTrigger);
+        }
+
+        // Body attack animation for other clients (optional, but keeps visuals consistent).
+        if (m_bodyAnimator == null)
+            m_bodyAnimator = GetComponent<Animator>();
+        m_bodyAnimator?.SetTrigger(bodyAttackTrigger);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -202,6 +218,21 @@ public class ArcherAttack : BaseAttack
         // Initialize server physics + collision ignore rules
         var arrow = arrowGo.GetComponent<Arrow>();
         if (arrow != null)
-            arrow.ServerInit(dir, arrowSpeed, dmg, shooterId, ff, enablePercentHpBonus);
+        {
+            bool enablePct = enablePercentHpBonus;
+            float pctNormal = 0.10f;
+            float pctBoss = 0.03f;
+            string bossTag = "Boss";
+
+            if (shooterStats != null && shooterStats.Definition != null)
+            {
+                enablePct = shooterStats.Definition.enablePercentCurrentHpBonusOnHit;
+                pctNormal = shooterStats.Definition.percentCurrentHpBonus;
+                pctBoss = shooterStats.Definition.percentCurrentHpBonusBoss;
+                bossTag = shooterStats.Definition.bossTag;
+            }
+
+            arrow.ServerInit(dir, arrowSpeed, dmg, shooterId, ff, enablePct, pctNormal, pctBoss, bossTag);
+        }
     }
 }

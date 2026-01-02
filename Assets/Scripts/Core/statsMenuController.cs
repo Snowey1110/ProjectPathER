@@ -11,8 +11,8 @@ public class statsMenuController : MonoBehaviour
     public TextMeshProUGUI MPP;
     public TextMeshProUGUI SKILLPOINTS;
 
-    // For most classes these are direct stat deltas.
-    // For Archer/Mage: tempATK/tempHPP represent POINTS spent on that stat (server applies class rules).
+    // These are the deltas/points the player is previewing.
+    // How they apply is defined by the player's StatsDefinition spend rules.
     private int tempATK;
     private int tempDEF;
     private int tempHPP;
@@ -27,45 +27,44 @@ public class statsMenuController : MonoBehaviour
         return go != null ? go.GetComponent<stats>() : null;
     }
 
-    private static bool IsArcherOrMage(stats st)
-    {
-        if (st == null) return false;
-        var ident = st.GetComponent<ClassIdentity>();
-        return ident != null && (ident.classType == ClassType.Archer || ident.classType == ClassType.Mage);
-    }
-
-    private static int PreviewPercentHp(int baseHp, int hpPoints, float pctPerPoint)
-    {
-        int hp = Mathf.Max(1, baseHp);
-        for (int i = 0; i < hpPoints; i++)
-            hp = Mathf.Max(1, Mathf.CeilToInt(hp * (1f + pctPerPoint)));
-        return hp;
-    }
+    private static StatsDefinition GetDef(stats st) => st != null ? st.Definition : null;
 
     public void loadStats()
     {
         var playerStats = GetLocalPlayerStats();
         if (playerStats == null) return;
 
-        bool usesPercentHpRules = IsArcherOrMage(playerStats);
+        var def = GetDef(playerStats);
 
         int abilityLeft = Mathf.Max(0, playerStats.AbilityPoints.Value - abilityPointSpent);
 
         LEVEL.text = $"Level: {playerStats.Level.Value}";
 
         int baseAtk = playerStats.Damage.Value + playerStats.BonusDamage.Value;
-        int shownAtk = usesPercentHpRules ? baseAtk + (tempATK * 10) : baseAtk + tempATK;
+        int shownAtk = (def != null)
+            ? def.spendDamage.PreviewDelta(baseAtk, tempATK)
+            : Mathf.Max(1, baseAtk + tempATK);
         ATK.text = $"ATK: {shownAtk}";
 
-        DEF.text = $"DEF: {playerStats.Defense.Value + tempDEF}";
-        SPD.text = $"SPD: {playerStats.MoveSpeed.Value + tempSPD}";
+        int shownDef = (def != null)
+            ? def.spendDefense.PreviewDelta(playerStats.Defense.Value, tempDEF)
+            : Mathf.Max(0, playerStats.Defense.Value + tempDEF);
+        DEF.text = $"DEF: {shownDef}";
 
-        int shownHp = usesPercentHpRules
-            ? PreviewPercentHp(playerStats.MaxHP.Value, tempHPP, 0.10f)
-            : playerStats.MaxHP.Value + tempHPP;
+        float shownSpd = (def != null)
+            ? def.spendMoveSpeed.PreviewDelta(playerStats.MoveSpeed.Value, tempSPD)
+            : Mathf.Max(0.01f, playerStats.MoveSpeed.Value + tempSPD);
+        SPD.text = $"SPD: {shownSpd}";
+
+        int shownHp = (def != null)
+            ? def.spendMaxHp.PreviewDelta(playerStats.MaxHP.Value, tempHPP)
+            : Mathf.Max(1, playerStats.MaxHP.Value + tempHPP);
         HPP.text = $"HP: {shownHp}";
 
-        MPP.text = $"MP: {playerStats.Mana.Value + tempMPP}";
+        int shownMana = (def != null)
+            ? def.spendMana.PreviewDelta(playerStats.Mana.Value, tempMPP)
+            : Mathf.Max(0, playerStats.Mana.Value + tempMPP);
+        MPP.text = $"MP: {shownMana}";
         SKILLPOINTS.text = $"Ability Points remaining: {abilityLeft}";
     }
 
@@ -83,8 +82,6 @@ public class statsMenuController : MonoBehaviour
         switch (statType)
         {
             case "ATK":
-                // Archer/Mage: step is POINTS spent (server applies +10 damage per point).
-                // Others: step is raw stat delta.
                 tempATK += step;
                 break;
             case "DEF":
@@ -94,8 +91,6 @@ public class statsMenuController : MonoBehaviour
                 tempSPD += step;
                 break;
             case "HPP":
-                // Archer/Mage: step is POINTS spent (server applies +10% HP per point).
-                // Others: step is raw stat delta.
                 tempHPP += step;
                 break;
             case "MPP":
@@ -127,12 +122,9 @@ public class statsMenuController : MonoBehaviour
         if (playerStats == null) return;
         if (abilityPointSpent <= 0) return;
 
-        bool usesPercentHpRules = IsArcherOrMage(playerStats);
-
-        // Archer/Mage: send POINTS (tempATK/tempHPP) instead of raw deltas.
-        // Other classes: unchanged behavior (raw deltas).
-        int sendDeltaDamage = usesPercentHpRules ? Mathf.Max(0, tempATK) : tempATK;
-        int sendDeltaMaxHp = usesPercentHpRules ? Mathf.Max(0, tempHPP) : tempHPP;
+        // Server interprets these based on the StatsDefinition spend rules.
+        int sendDeltaDamage = tempATK;
+        int sendDeltaMaxHp = tempHPP;
 
         playerStats.SpendAbilityPointsServerRpc(
             deltaDamage: sendDeltaDamage,

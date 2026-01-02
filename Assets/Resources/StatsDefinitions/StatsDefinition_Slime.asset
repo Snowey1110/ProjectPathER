@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 934984e2104c43c5804c6e7cf817d007, type: 3}
+  m_Name: StatsDefinition_Slime
+  m_EditorClassIdentifier: 
+  id: Slime
+  defaultStartLevel: 1
+  maxHp:
+    baseValue: 20
+    addPerLevel: 0
+    mulPerLevel: 1.5
+  damage:
+    baseValue: 10
+    addPerLevel: 0
+    mulPerLevel: 2
+  defense:
+    baseValue: 0
+    addPerLevel: 0
+    mulPerLevel: 1
+  mana:
+    baseValue: 0
+    addPerLevel: 0
+    mulPerLevel: 1
+  moveSpeed:
+    baseValue: 5
+    addPerLevel: 0
+    mulPerLevel: 1
+  baseBonusDamage: 0
+  abilityPointsPerLevel: 0
+  refillHpToFullOnLevelUp: 1
+  spendDamage:
+    mode: 0
+    addPerPoint: 1
+    percentPerPoint: 0.1
+  spendMaxHp:
+    mode: 0
+    addPerPoint: 1
+    percentPerPoint: 0.1
+  spendDefense:
+    mode: 0
+    addPerPoint: 1
+    percentPerPoint: 0.1
+  spendMana:
+    mode: 0
+    addPerPoint: 1
+    percentPerPoint: 0.1
+  spendMoveSpeed:
+    mode: 0
+    addPerPoint: 1
+    percentPerPoint: 0.1
+  enableSingleHitClamp: 0
+  clampPercentOfCurrentHp: 0.5
+  clampMinus: 1
+  enablePercentCurrentHpBonusOnHit: 0
+  percentCurrentHpBonus: 0.1
+  percentCurrentHpBonusBoss: 0.03
+  bossTag: Boss

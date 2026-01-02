@@ -11,6 +11,16 @@ public class SlimeSpawner : NetworkBehaviour
     [SerializeField] private float spawnInterval = 10f;
     [SerializeField] private int spawnCount = 3;
 
+    [Header("Slime Stats (Optional)")]
+    [Tooltip("If set, applied to spawned slimes before Spawn(). If null, slimes auto-resolve their StatsDefinition by context.")]
+    [SerializeField] private StatsDefinition slimeStatsDefinition;
+
+    [Tooltip("If false, spawned slimes use their StatsDefinition's Default Start Level.")]
+    [SerializeField] private bool overrideSlimeStartLevel = false;
+
+    [Tooltip("Used only when Override Slime Start Level is enabled.")]
+    [SerializeField] private int slimeStartLevel = 1;
+
     [Header("Day / Night")]
     [Tooltip("If true, spawner is paused. If false (night), spawner runs.")]
     [SerializeField] private bool startAsDayTime = true;
@@ -156,6 +166,18 @@ public class SlimeSpawner : NetworkBehaviour
                 Debug.LogError("[SlimeSpawner] Slime prefab missing NetworkObject.");
                 Destroy(slime);
                 continue;
+            }
+
+            // Configure stats BEFORE Spawn() so OnNetworkSpawn initializes with these values on server.
+            var st = slime.GetComponent<stats>();
+            if (st != null)
+            {
+                int levelToApply = overrideSlimeStartLevel ? slimeStartLevel : 0; // <=0 => use definition default
+
+                if (slimeStatsDefinition != null)
+                    st.ServerConfigure(slimeStatsDefinition, levelToApply);
+                else if (overrideSlimeStartLevel)
+                    st.ServerSetStartLevel(levelToApply);
             }
 
             no.Spawn(true);

@@ -17,6 +17,9 @@ public class Arrow : NetworkBehaviour
     private bool friendlyFire;
     private ulong shooterId;
     private bool enablePercentHpBonus;
+    private float pctHpBonus;
+    private float pctHpBonusBoss;
+    private string bossTag;
 
     public float SpriteAngleOffsetDeg => spriteAngleOffsetDeg;
 
@@ -52,7 +55,7 @@ public class Arrow : NetworkBehaviour
         Invoke(nameof(ServerDespawn), lifetimeSeconds);
     }
 
-    public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId, bool shooterFriendlyFire, bool enablePctHpBonus)
+    public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId, bool shooterFriendlyFire, bool enablePctHpBonus, float pctNormal, float pctBoss, string bossTagName)
     {
         if (!IsServer) return;
 
@@ -61,6 +64,9 @@ public class Arrow : NetworkBehaviour
         friendlyFire = shooterFriendlyFire;
         shooterId = shooterNetworkObjectId;
         enablePercentHpBonus = enablePctHpBonus;
+        pctHpBonus = Mathf.Clamp01(pctNormal);
+        pctHpBonusBoss = Mathf.Clamp01(pctBoss);
+        bossTag = string.IsNullOrWhiteSpace(bossTagName) ? "Boss" : bossTagName;
 
         // Temporarily disable collider while setting ignore rules to avoid immediate self-hit at spawn
         if (col != null) col.enabled = false;
@@ -94,26 +100,7 @@ public class Arrow : NetworkBehaviour
         }
     }
 
-    private bool ShooterIsArcher()
-    {
-        if (!IsServer) return false;
-        if (NetworkManager.Singleton == null) return false;
-
-        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(shooterId, out var shooterNo) || shooterNo == null)
-            return false;
-
-        // Prefer PlayerController class flag if present
-        var pc = shooterNo.GetComponent<PlayerController>();
-        if (pc != null)
-            return pc.Class.Value == PlayerClass.Archer;
-
-        // Fallback to ClassIdentity
-        var ident = shooterNo.GetComponent<ClassIdentity>();
-        if (ident != null)
-            return ident.classType == ClassType.Archer;
-
-        return false;
-    }
+    // Percent-current-HP bonus is driven by the shooter's StatsDefinition (passed in from ArcherAttack).
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -145,8 +132,8 @@ public class Arrow : NetworkBehaviour
         {
             int total = Mathf.Max(1, damage);
 
-            // Percent-current-HP bonus damage is ARCHER-only.
-            if (enablePercentHpBonus && ShooterIsArcher())
+            // Percent-current-HP bonus damage (Archer trait).
+            if (enablePercentHpBonus)
             {
                 int curHp = Mathf.Max(0, s.CurrentHP.Value);
                 bool isBoss = false;
@@ -156,10 +143,10 @@ public class Arrow : NetworkBehaviour
                 {
                     string t1 = other.tag;
                     string t2 = other.transform != null && other.transform.root != null ? other.transform.root.tag : string.Empty;
-                    isBoss = (t1 == "Boss") || (t2 == "Boss");
+                    isBoss = (t1 == bossTag) || (t2 == bossTag);
                 }
 
-                float pct = isBoss ? 0.03f : 0.10f;
+                float pct = isBoss ? pctHpBonusBoss : pctHpBonus;
                 int pctBonus = Mathf.CeilToInt(curHp * pct);
                 total = Mathf.Max(1, total + pctBonus);
             }
