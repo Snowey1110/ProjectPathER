@@ -4,6 +4,7 @@ using Netcode.Transports.Facepunch; // Swapped UTP for Facepunch
 using Steamworks; // Added Steamworks
 using TMPro;
 using UnityEngine.SceneManagement;
+using Unity.Netcode.Transports.UTP;
 
 public class NetworkMenuUI : MonoBehaviour
 {
@@ -13,6 +14,15 @@ public class NetworkMenuUI : MonoBehaviour
 
     // Singleton check to prevent duplicates if you return to menu
     private static NetworkMenuUI instance;
+
+    [Header("Status text")]
+    [Tooltip("If assigned, status messages will be shown here in addition to Debug.Log.")]
+    public TMP_Text statusText;
+
+    private FacepunchTransport facepunchTransport;
+    private UnityTransport unityTransport;
+
+    private bool SteamAvailable => SteamClient.IsValid;
 
     private void Awake()
     {
@@ -30,18 +40,19 @@ public class NetworkMenuUI : MonoBehaviour
 
     private void Start()
     {
-        // Initialize Steam Client
-        if (!SteamClient.IsValid)
+        CacheTransports();
+
+        // Steam is OPTIONAL. We only require it for Steam multiplayer.
+        // If Steam isn't available, the game can still run in "singleplayer" using UnityTransport.
+        TryInitSteamClient();
+
+        // Default behavior:
+        // - If Steam is available -> keep Steam transport enabled.
+        // - If not -> switch to UnityTransport so Singleplayer works immediately.
+        if (!SteamAvailable)
         {
-            try
-            {
-                SteamClient.Init(480);
-                Debug.Log($"Steam Initialized: {SteamClient.Name}");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError("Steam Failed to Init: " + e.Message);
-            }
+            SelectUnityTransport();
+            SetStatus("Steam not available. Singleplayer (local) is enabled; multiplayer requires Steam.");
         }
 
         // Hide the input field initially
@@ -58,8 +69,11 @@ public class NetworkMenuUI : MonoBehaviour
 
     private void Update()
     {
-        // Run Steam Callbacks every frame
-        SteamClient.RunCallbacks();
+        // Run Steam callbacks only when Steam is actually initialized.
+        if (SteamAvailable)
+        {
+            SteamClient.RunCallbacks();
+        }
     }
 
     private void OnDestroy()
@@ -79,7 +93,12 @@ public class NetworkMenuUI : MonoBehaviour
 
         // Shutdown Steam SECOND
         // This gives the Transport time to clean up its sockets before we kill the Steam Client.
-        SteamClient.Shutdown();
+        // Shutdown Steam SECOND (only if it was initialized)
+        try
+        {
+            if (SteamAvailable) SteamClient.Shutdown();
+        }
+        catch { /* ignore shutdown exceptions */ }
     }
 
 
@@ -106,6 +125,14 @@ public class NetworkMenuUI : MonoBehaviour
 
     private void AttemptConnection()
     {
+        if (!SteamAvailable)
+        {
+            SetStatus("Steam is not available. Multiplayer requires Steam (launch through Steam and ensure you are logged in).");
+            return;
+        }
+
+        SelectFacepunchTransport();
+
         // Logic: Parse Steam ID instead of IP
         string idText = steamIdInputField.text;
 
@@ -114,8 +141,7 @@ public class NetworkMenuUI : MonoBehaviour
             Debug.Log($"Connecting to Steam ID: {friendId}...");
 
             // Set the Facepunch Transport Target
-            var transport = NetworkManager.Singleton.GetComponent<FacepunchTransport>();
-            transport.targetSteamId = friendId;
+            facepunchTransport.targetSteamId = friendId;
 
             // Start Client
             NetworkManager.Singleton.StartClient();
@@ -131,14 +157,118 @@ public class NetworkMenuUI : MonoBehaviour
 
     public void OnStartHostClicked()
     {
+        // If Steam isn't available, fall back to local singleplayer.
+        if (!SteamAvailable)
+        {
+            SetStatus("Steam is not available. Starting Singleplayer (local host) instead.");
+            StartSingleplayer();
+            return;
+        }
+
         Debug.Log("Starting Host via Steam...");
+        SelectFacepunchTransport();
 
         // Facepunch handles the "Target ID" automatically for hosts (it uses your own)
-        var transport = NetworkManager.Singleton.GetComponent<FacepunchTransport>();
-        transport.targetSteamId = SteamClient.SteamId;
+        facepunchTransport.targetSteamId = SteamClient.SteamId;
 
         NetworkManager.Singleton.StartHost();
         NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+    }
+
+    // Hook this to a "Singleplayer" button (recommended).
+    public void OnSingleplayerClicked()
+    {
+        StartSingleplayer();
+    }
+
+    private void StartSingleplayer()
+    {
+        SelectUnityTransport();
+        Debug.Log("Starting Singleplayer (local host via UnityTransport)...");
+        NetworkManager.Singleton.StartHost();
+        NetworkManager.Singleton.SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+    }
+
+    private void CacheTransports()
+    {
+        if (NetworkManager.Singleton == null)
+        {
+            Debug.LogError("NetworkManager.Singleton is null. Make sure the NetworkManager exists in the MainMenu scene.");
+            return;
+        }
+
+        facepunchTransport = NetworkManager.Singleton.GetComponent<FacepunchTransport>();
+        unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+
+        // If UnityTransport isn't present in the scene, add it at runtime so singleplayer can still work.
+        if (unityTransport == null)
+        {
+            unityTransport = NetworkManager.Singleton.gameObject.AddComponent<UnityTransport>();
+        }
+
+        if (facepunchTransport == null)
+        {
+            Debug.LogWarning("FacepunchTransport is missing on NetworkManager. Steam multiplayer will not work.");
+        }
+    }
+
+    private void TryInitSteamClient()
+    {
+        // Initialize Steam Client if possible. If this fails, we still allow singleplayer.
+        if (SteamClient.IsValid) return;
+
+        try
+        {
+            SteamClient.Init(480);
+            Debug.Log($"Steam Initialized: {SteamClient.Name}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("Steam not initialized (singleplayer is still available): " + e.Message);
+        }
+    }
+
+    private void SelectFacepunchTransport()
+    {
+        CacheTransports();
+
+        if (facepunchTransport == null)
+        {
+            SetStatus("FacepunchTransport missing; cannot start Steam multiplayer.");
+            return;
+        }
+
+        if (unityTransport != null) unityTransport.enabled = false;
+        facepunchTransport.enabled = true;
+
+        NetworkManager.Singleton.NetworkConfig.NetworkTransport = facepunchTransport;
+    }
+
+    private void SelectUnityTransport()
+    {
+        CacheTransports();
+
+        if (unityTransport == null)
+        {
+            SetStatus("UnityTransport missing; cannot start singleplayer.");
+            return;
+        }
+
+        if (facepunchTransport != null) facepunchTransport.enabled = false;
+        unityTransport.enabled = true;
+
+        // Local host defaults
+        unityTransport.ConnectionData.Address = "127.0.0.1";
+        NetworkManager.Singleton.NetworkConfig.NetworkTransport = unityTransport;
+    }
+
+    private void SetStatus(string message)
+    {
+        Debug.Log(message);
+        if (statusText != null)
+        {
+            statusText.text = message;
+        }
     }
 
     public void OnQuitClicked()
