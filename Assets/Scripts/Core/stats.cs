@@ -8,6 +8,18 @@ using UnityEngine;
 
 public class stats : NetworkBehaviour
 {
+    private enum StatsProfile
+    {
+        Generic = 0,
+        Archer = 1,
+        Knight = 2,
+        Slime = 3,
+        Mage = 4,
+        Healer = 5,
+    }
+
+    private StatsProfile _profile = StatsProfile.Generic;
+
     [Header("UI")]
     public HealthBar healthBar;
 
@@ -16,6 +28,7 @@ public class stats : NetworkBehaviour
     public int defense = 0;
     public int mana = 0;
     public int baseDamage = 1;
+    public int bonusDamage = 0;  // flat bonus damage (used by Archer)
     public int level = 1;
     public int abilityPoints = 0;
     public int skillPoints = 1;
@@ -36,6 +49,10 @@ public class stats : NetworkBehaviour
 
     public NetworkVariable<int> Damage = new NetworkVariable<int>(
         1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    // Flat bonus damage (used by Archer). Default 0 for other units.
+    public NetworkVariable<int> BonusDamage = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public NetworkVariable<int> Defense = new NetworkVariable<int>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -70,15 +87,82 @@ public class stats : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        // Cache profile on both server and clients (combat rules need it on server).
+        _profile = ResolveProfile();
+
         if (IsServer)
         {
-            // Initialize authoritative values from prefab defaults
+            // Initialize authoritative values from prefab defaults (or class rules)
             Level.Value = Mathf.Max(1, level);
 
-            MaxHP.Value = Mathf.Max(1, HP);
+            switch (_profile)
+            {
+                case StatsProfile.Archer:
+                {
+                    // Archer: base HP 30, base damage 10. Level-up adds +5 HP/+5 damage.
+                    int startLevel = Level.Value;
+                    MaxHP.Value = Mathf.Max(1, 30 + (startLevel - 1) * 5);
+                    Damage.Value = Mathf.Max(1, 10 + (startLevel - 1) * 5);
+                    BonusDamage.Value = Mathf.Max(0, bonusDamage);
+                    break;
+                }
+                                case StatsProfile.Mage:
+                {
+                    // Mage: same as Archer (base HP 30, base damage 10, +5/+5 per level).
+                    int startLevel = Level.Value;
+                    MaxHP.Value = Mathf.Max(1, 30 + (startLevel - 1) * 5);
+                    Damage.Value = Mathf.Max(1, 10 + (startLevel - 1) * 5);
+                    BonusDamage.Value = Mathf.Max(0, bonusDamage);
+                    break;
+                }
+                case StatsProfile.Healer:
+                {
+                    // Healer: base HP 50, base damage 5. Level-up: +1 damage, HP stays 50.
+                    int startLevel = Level.Value;
+                    MaxHP.Value = 50;
+                    Damage.Value = Mathf.Max(1, 5 + (startLevel - 1) * 1);
+                    BonusDamage.Value = 0;
+                    break;
+                }
+case StatsProfile.Knight:
+                {
+                    // Knight: base HP 100 (+10/level), base damage 10 (+2/level).
+                    int startLevel = Level.Value;
+                    MaxHP.Value = Mathf.Max(1, 100 + (startLevel - 1) * 10);
+                    Damage.Value = Mathf.Max(1, 10 + (startLevel - 1) * 2);
+                    BonusDamage.Value = 0;
+                    break;
+                }
+                case StatsProfile.Slime:
+                {
+                    // Slime: base HP 20, base attack 10.
+                    // Level-up: HP +50% (x1.5), attack +100% (x2.0).
+                    int startLevel = Level.Value;
+
+                    float hp = 20f;
+                    float atk = 10f;
+                    for (int i = 1; i < startLevel; i++)
+                    {
+                        hp *= 1.5f;
+                        atk *= 2.0f;
+                    }
+
+                    MaxHP.Value = Mathf.Max(1, Mathf.CeilToInt(hp));
+                    Damage.Value = Mathf.Max(1, Mathf.CeilToInt(atk));
+                    BonusDamage.Value = 0;
+                    break;
+                }
+                default:
+                {
+                    MaxHP.Value = Mathf.Max(1, HP);
+                    Damage.Value = Mathf.Max(1, baseDamage);
+                    BonusDamage.Value = Mathf.Max(0, bonusDamage);
+                    break;
+                }
+            }
+
             CurrentHP.Value = MaxHP.Value;
 
-            Damage.Value = Mathf.Max(1, baseDamage);
             Defense.Value = Mathf.Max(0, defense);
             Mana.Value = Mathf.Max(0, mana);
             MoveSpeed.Value = Mathf.Max(0.01f, moveSpeed);
@@ -148,6 +232,23 @@ public class stats : NetworkBehaviour
 
         if (damageReceived <= 0) return;
 
+        // Knight: if a single hit would take more than ~50% of CURRENT HP,
+        // clamp it to (50% - 1) of current HP.
+        // Example: current HP 100 -> max hit 49.
+        if (_profile == StatsProfile.Knight)
+        {
+            int cur = Mathf.Max(0, CurrentHP.Value);
+            if (cur > 2)
+            {
+                int maxAllowed = Mathf.FloorToInt(cur * 0.5f) - 1;
+                if (maxAllowed > 0 && damageReceived > maxAllowed)
+                    damageReceived = maxAllowed;
+            }
+
+            // Safety: never allow a "no-op" hit due to clamp math.
+            damageReceived = Mathf.Max(1, damageReceived);
+        }
+
         int newHp = Mathf.Max(0, CurrentHP.Value - damageReceived);
         CurrentHP.Value = newHp;
 
@@ -198,16 +299,51 @@ public class stats : NetworkBehaviour
 
         Level.Value = Mathf.Max(1, Level.Value + 1);
 
-        MaxHP.Value = Mathf.Max(1, Mathf.CeilToInt(MaxHP.Value * 1.10f));
-        Damage.Value = Mathf.Max(1, Mathf.CeilToInt(Damage.Value * 1.10f));
-        Defense.Value = Mathf.Max(0, Mathf.CeilToInt(Defense.Value * 1.10f));
-        Mana.Value = Mathf.Max(0, Mathf.CeilToInt(Mana.Value * 1.10f));
-        MoveSpeed.Value = Mathf.Max(0.01f, MoveSpeed.Value * 1.10f);
+        switch (_profile)
+        {
+            case StatsProfile.Archer:
+            case StatsProfile.Mage:
+                // Archer/Mage: +5 base damage, +5 base HP per level.
+                MaxHP.Value = Mathf.Max(1, MaxHP.Value + 5);
+                Damage.Value = Mathf.Max(1, Damage.Value + 5);
+                CurrentHP.Value = MaxHP.Value;
+                AbilityPoints.Value += Mathf.Max(0, abilityPointsPerLevel);
+                break;
 
-        // Full heal on level up
-        CurrentHP.Value = MaxHP.Value;
+            case StatsProfile.Healer:
+                // Healer: +1 base damage per level. MaxHP does not increase on level-up.
+                Damage.Value = Mathf.Max(1, Damage.Value + 1);
+                CurrentHP.Value = MaxHP.Value;
+                AbilityPoints.Value += Mathf.Max(0, abilityPointsPerLevel);
+                break;
 
-        AbilityPoints.Value += Mathf.Max(0, abilityPointsPerLevel);
+            case StatsProfile.Knight:
+                // Knight: +2 base damage, +10 base HP per level.
+                MaxHP.Value = Mathf.Max(1, MaxHP.Value + 10);
+                Damage.Value = Mathf.Max(1, Damage.Value + 2);
+                CurrentHP.Value = MaxHP.Value;
+                AbilityPoints.Value += Mathf.Max(0, abilityPointsPerLevel);
+                break;
+
+            case StatsProfile.Slime:
+                // Slime: HP +50% (x1.5), Attack +100% (x2.0).
+                MaxHP.Value = Mathf.Max(1, Mathf.CeilToInt(MaxHP.Value * 1.5f));
+                Damage.Value = Mathf.Max(1, Mathf.CeilToInt(Damage.Value * 2.0f));
+                CurrentHP.Value = MaxHP.Value;
+                break;
+
+            default:
+                // Default behavior (legacy): +10% to core stats.
+                MaxHP.Value = Mathf.Max(1, Mathf.CeilToInt(MaxHP.Value * 1.10f));
+                Damage.Value = Mathf.Max(1, Mathf.CeilToInt(Damage.Value * 1.10f));
+                Defense.Value = Mathf.Max(0, Mathf.CeilToInt(Defense.Value * 1.10f));
+                Mana.Value = Mathf.Max(0, Mathf.CeilToInt(Mana.Value * 1.10f));
+                MoveSpeed.Value = Mathf.Max(0.01f, MoveSpeed.Value * 1.10f);
+
+                CurrentHP.Value = MaxHP.Value;
+                AbilityPoints.Value += Mathf.Max(0, abilityPointsPerLevel);
+                break;
+        }
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
@@ -227,16 +363,36 @@ public class stats : NetworkBehaviour
 
         AbilityPoints.Value -= cost;
 
-        if (deltaDamage != 0) Damage.Value = Mathf.Max(1, Damage.Value + deltaDamage);
+        if (_profile == StatsProfile.Archer || _profile == StatsProfile.Mage)
+        {
+            // Archer-specific spending rules:
+            // - Damage points: +10 base damage per point
+            // - HP points: +10% MaxHP per point (compounding)
+            if (deltaDamage > 0)
+                Damage.Value = Mathf.Max(1, Damage.Value + deltaDamage * 10);
+
+            if (deltaMaxHp > 0)
+            {
+                for (int i = 0; i < deltaMaxHp; i++)
+                    MaxHP.Value = Mathf.Max(1, Mathf.CeilToInt(MaxHP.Value * 1.10f));
+
+                CurrentHP.Value = Mathf.Min(CurrentHP.Value, MaxHP.Value);
+            }
+        }
+        else
+        {
+            if (deltaDamage != 0) Damage.Value = Mathf.Max(1, Damage.Value + deltaDamage);
+
+            if (deltaMaxHp != 0)
+            {
+                MaxHP.Value = Mathf.Max(1, MaxHP.Value + deltaMaxHp);
+                CurrentHP.Value = Mathf.Min(CurrentHP.Value, MaxHP.Value);
+            }
+        }
+
         if (deltaDefense != 0) Defense.Value = Mathf.Max(0, Defense.Value + deltaDefense);
         if (deltaMana != 0) Mana.Value = Mathf.Max(0, Mana.Value + deltaMana);
         if (deltaMoveSpeed != 0f) MoveSpeed.Value = Mathf.Max(0.01f, MoveSpeed.Value + deltaMoveSpeed);
-
-        if (deltaMaxHp != 0)
-        {
-            MaxHP.Value = Mathf.Max(1, MaxHP.Value + deltaMaxHp);
-            CurrentHP.Value = Mathf.Min(CurrentHP.Value, MaxHP.Value);
-        }
     }
 
     // Used by altar restore (server-only)
@@ -244,6 +400,7 @@ public class stats : NetworkBehaviour
         int snapLevel,
         int snapMaxHp,
         int snapDamage,
+        int snapBonusDamage,
         int snapDefense,
         int snapMana,
         float snapMoveSpeed,
@@ -256,6 +413,7 @@ public class stats : NetworkBehaviour
         Level.Value = Mathf.Max(1, snapLevel);
         MaxHP.Value = Mathf.Max(1, snapMaxHp);
         Damage.Value = Mathf.Max(1, snapDamage);
+        BonusDamage.Value = Mathf.Max(0, snapBonusDamage);
         Defense.Value = Mathf.Max(0, snapDefense);
         Mana.Value = Mathf.Max(0, snapMana);
         MoveSpeed.Value = Mathf.Max(0.01f, snapMoveSpeed);
@@ -308,6 +466,29 @@ public class stats : NetworkBehaviour
         float baseVal = Mathf.Max(1, xpToNextDefault);
         float scaled = baseVal * Mathf.Pow(1.15f, Mathf.Max(0, currentLevel - 1));
         return Mathf.Max(1, Mathf.CeilToInt(scaled));
+    }
+
+    private StatsProfile ResolveProfile()
+    {
+        // Monsters (explicit)
+        if (GetComponent<Slime>() != null)
+            return StatsProfile.Slime;
+
+        // Player classes
+        var ident = GetComponent<ClassIdentity>();
+        if (ident != null)
+        {
+            return ident.classType switch
+            {
+                ClassType.Archer => StatsProfile.Archer,
+                ClassType.Knight => StatsProfile.Knight,
+                ClassType.Mage => StatsProfile.Mage,
+                ClassType.Healer => StatsProfile.Healer,
+                _ => StatsProfile.Generic
+            };
+        }
+
+        return StatsProfile.Generic;
     }
 
 

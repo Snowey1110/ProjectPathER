@@ -1,5 +1,5 @@
-using Unity.Netcode;
 using Unity.Netcode.Components;
+using Unity.Netcode;
 using UnityEngine;
 
 public class ArcherAttack : BaseAttack
@@ -15,14 +15,19 @@ public class ArcherAttack : BaseAttack
     [Tooltip("Bow shoot trigger on the Bow Animator/NetworkAnimator.")]
     [SerializeField] private string bowShootTrigger = "Shoot";
 
-    [Tooltip("Bow shoot state name (used to look up clip length).")]
+    [Tooltip("Bow shoot state/clip name (used to look up clip length).")]
     [SerializeField] private string bowShootClipName = "BowShoot";
 
-    [Tooltip("Float parameter on Bow Animator that scales the BowShoot state's speed (added to Bow.controller in this patch).")]
+    [Tooltip("Float parameter on Bow Animator that scales the BowShoot state's speed.")]
     [SerializeField] private string bowSpeedMultParam = "SpeedMult";
 
     [SerializeField] private float minSpeedMult = 0.05f;
     [SerializeField] private float maxSpeedMult = 20f;
+
+    // If you ever reuse Arrow for Mage, you can toggle this off in a Mage-specific attack.
+    [Header("Archer Bonus")]
+    [Tooltip("When true, Arrow applies percent-of-current-HP bonus damage to non-player targets.")]
+    [SerializeField] private bool enablePercentHpBonus = true;
 
     // Cached (auto-discovered to avoid coupling PlayerController to Archer)
     private ClientNetworkAnimator m_bodyNetAnimator;
@@ -32,12 +37,11 @@ public class ArcherAttack : BaseAttack
 
     private void Awake()
     {
-        // Body animator is on the root (client-authoritative in this project)
+        // Body animator is on the root
         if (m_bodyNetAnimator == null)
             m_bodyNetAnimator = GetComponent<ClientNetworkAnimator>();
 
         // Bow animator + bow NetworkAnimator live on the Bow child object.
-        // (Auto-discovery keeps PlayerController class-agnostic.)
         if (m_bowAnimator == null)
         {
             var anims = GetComponentsInChildren<Animator>(true);
@@ -102,20 +106,18 @@ public class ArcherAttack : BaseAttack
             }
         }
 
-        // Fallback: unknown, leave as -1.
         m_bowShootClipLen = -1f;
     }
 
     private void PlayAttackVisuals()
     {
-        // Body swing / recoil
+        // Body attack
         if (m_bodyNetAnimator != null)
             m_bodyNetAnimator.SetTrigger(bodyAttackTrigger);
         else
             GetComponent<Animator>()?.SetTrigger(bodyAttackTrigger);
 
         // Bow shoot + reload should match fire rate.
-        // We scale the BowShoot state speed so its full duration == attackRate.
         if (m_bowAnimator != null)
         {
             CacheBowShootClipLen();
@@ -128,9 +130,7 @@ public class ArcherAttack : BaseAttack
             }
         }
 
-        // Trigger the bow animation.
-        // NOTE: Bow.controller is patched to include an AnyState->BowShoot transition on "Shoot",
-        // so repeated shots re-enter BowShoot from the first frame even if currently reloading.
+        // Trigger bow animation (controller has AnyState->BowShoot on this trigger so it restarts from frame 0)
         if (m_bowNetAnimator != null)
             m_bowNetAnimator.SetTrigger(bowShootTrigger);
         else
@@ -185,10 +185,11 @@ public class ArcherAttack : BaseAttack
             return;
         }
 
-        // Damage from shooter stats
+        // Damage from shooter stats (base + flat bonus)
         int dmg = 1;
         var shooterStats = shooterNo.GetComponent<stats>();
-        if (shooterStats != null) dmg = shooterStats.Damage.Value;
+        if (shooterStats != null)
+            dmg = Mathf.Max(1, shooterStats.Damage.Value + shooterStats.BonusDamage.Value);
 
         // Friendly fire from PlayerController (server authoritative)
         bool ff = false;
@@ -201,6 +202,6 @@ public class ArcherAttack : BaseAttack
         // Initialize server physics + collision ignore rules
         var arrow = arrowGo.GetComponent<Arrow>();
         if (arrow != null)
-            arrow.ServerInit(dir, arrowSpeed, dmg, shooterId, ff);
+            arrow.ServerInit(dir, arrowSpeed, dmg, shooterId, ff, enablePercentHpBonus);
     }
 }

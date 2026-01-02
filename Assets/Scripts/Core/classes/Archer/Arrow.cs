@@ -15,8 +15,10 @@ public class Arrow : NetworkBehaviour
     private int damage;
     private bool initialized;
     private bool friendlyFire;
-    public float SpriteAngleOffsetDeg => spriteAngleOffsetDeg;
+    private ulong shooterId;
+    private bool enablePercentHpBonus;
 
+    public float SpriteAngleOffsetDeg => spriteAngleOffsetDeg;
 
     private void Awake()
     {
@@ -50,13 +52,15 @@ public class Arrow : NetworkBehaviour
         Invoke(nameof(ServerDespawn), lifetimeSeconds);
     }
 
-    public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId, bool shooterFriendlyFire)
+    public void ServerInit(Vector2 dir, float speed, int dmg, ulong shooterNetworkObjectId, bool shooterFriendlyFire, bool enablePctHpBonus)
     {
         if (!IsServer) return;
 
         damage = dmg;
         initialized = true;
         friendlyFire = shooterFriendlyFire;
+        shooterId = shooterNetworkObjectId;
+        enablePercentHpBonus = enablePctHpBonus;
 
         // Temporarily disable collider while setting ignore rules to avoid immediate self-hit at spawn
         if (col != null) col.enabled = false;
@@ -90,6 +94,27 @@ public class Arrow : NetworkBehaviour
         }
     }
 
+    private bool ShooterIsArcher()
+    {
+        if (!IsServer) return false;
+        if (NetworkManager.Singleton == null) return false;
+
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(shooterId, out var shooterNo) || shooterNo == null)
+            return false;
+
+        // Prefer PlayerController class flag if present
+        var pc = shooterNo.GetComponent<PlayerController>();
+        if (pc != null)
+            return pc.Class.Value == PlayerClass.Archer;
+
+        // Fallback to ClassIdentity
+        var ident = shooterNo.GetComponent<ClassIdentity>();
+        if (ident != null)
+            return ident.classType == ClassType.Archer;
+
+        return false;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!IsServer || !initialized) return;
@@ -101,9 +126,6 @@ public class Arrow : NetworkBehaviour
         {
             // Ghost is never hittable
             if (targetPC.Class.Value == PlayerClass.Ghost) return;
-
-            // Always ignore Archer class
-            //if (targetPC.Class.Value == PlayerClass.Archer) return;
 
             // Friendly fire OFF: ignore other player classes
             if (!friendlyFire) return;
@@ -121,7 +143,28 @@ public class Arrow : NetworkBehaviour
         var s = other.GetComponent<stats>();
         if (s != null)
         {
-            s.takeDamage(damage);
+            int total = Mathf.Max(1, damage);
+
+            // Percent-current-HP bonus damage is ARCHER-only.
+            if (enablePercentHpBonus && ShooterIsArcher())
+            {
+                int curHp = Mathf.Max(0, s.CurrentHP.Value);
+                bool isBoss = false;
+
+                // Use string comparison (avoid CompareTag) so projects without a "Boss" tag won't throw.
+                if (other != null)
+                {
+                    string t1 = other.tag;
+                    string t2 = other.transform != null && other.transform.root != null ? other.transform.root.tag : string.Empty;
+                    isBoss = (t1 == "Boss") || (t2 == "Boss");
+                }
+
+                float pct = isBoss ? 0.03f : 0.10f;
+                int pctBonus = Mathf.CeilToInt(curHp * pct);
+                total = Mathf.Max(1, total + pctBonus);
+            }
+
+            s.takeDamage(total);
             ServerDespawn();
         }
         else

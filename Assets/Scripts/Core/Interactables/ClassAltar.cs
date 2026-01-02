@@ -44,6 +44,9 @@ public class ClassAltar : NetworkBehaviour
     private readonly NetworkVariable<int> savedDamage = new NetworkVariable<int>(
         1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    private readonly NetworkVariable<int> savedBonusDamage = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private readonly NetworkVariable<int> savedDefense = new NetworkVariable<int>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -165,6 +168,7 @@ public class ClassAltar : NetworkBehaviour
         savedLevel.Value = st.Level.Value;
         savedMaxHp.Value = st.MaxHP.Value;
         savedDamage.Value = st.Damage.Value;
+        savedBonusDamage.Value = st.BonusDamage.Value;
         savedDefense.Value = st.Defense.Value;
         savedMana.Value = st.Mana.Value;
         savedMoveSpeed.Value = st.MoveSpeed.Value;
@@ -182,6 +186,7 @@ public class ClassAltar : NetworkBehaviour
             savedLevel.Value,
             savedMaxHp.Value,
             savedDamage.Value,
+            savedBonusDamage.Value,
             savedDefense.Value,
             savedMana.Value,
             savedMoveSpeed.Value,
