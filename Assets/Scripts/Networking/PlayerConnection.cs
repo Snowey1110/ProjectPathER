@@ -7,6 +7,62 @@ public class PlayerConnection : NetworkBehaviour
     [SerializeField] private Camera lobbyCamera;
     private bool _requestedSpawn;
 
+    /// <summary>
+    /// Re-enable the lobby/ghost state so the player can pick a class again.
+    /// Call this on the owning client.
+    /// </summary>
+    public void ReturnToLobby()
+    {
+        if (!IsOwner) return;
+
+        _requestedSpawn = false;
+
+        if (lobbyCamera != null)
+        {
+            lobbyCamera.gameObject.SetActive(true);
+
+            // Ensure camera is usable as main camera again.
+            if (!lobbyCamera.CompareTag("MainCamera"))
+                lobbyCamera.tag = "MainCamera";
+        }
+
+        // Safety: disable any leftover cameras/audio listeners from a despawned hero.
+        DisableAllNonLobbyCameras();
+    }
+
+    private void DisableAllNonLobbyCameras()
+    {
+        if (!IsOwner) return;
+
+        // Prefer the modern API to avoid FindObjectOfType deprecation warnings.
+        var cams = Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var cam in cams)
+        {
+            if (cam == null) continue;
+            if (lobbyCamera != null && cam == lobbyCamera) continue;
+
+            cam.enabled = false;
+            if (cam.CompareTag("MainCamera"))
+                cam.tag = "Untagged";
+        }
+
+        var listeners = Object.FindObjectsByType<AudioListener>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var al in listeners)
+        {
+            if (al == null) continue;
+            if (lobbyCamera != null && al.transform.IsChildOf(lobbyCamera.transform)) continue;
+            al.enabled = false;
+        }
+
+        // Ensure the lobby camera remains enabled and tagged.
+        if (lobbyCamera != null)
+        {
+            lobbyCamera.enabled = true;
+            lobbyCamera.gameObject.SetActive(true);
+            lobbyCamera.tag = "MainCamera";
+        }
+    }
+
     private void Start()
     {
         if (!IsOwner && lobbyCamera != null)

@@ -30,6 +30,9 @@ public class LobbyManager : NetworkBehaviour
     // clientId -> altar used to spawn (if spawned via an altar)
     private readonly Dictionary<ulong, ClassAltar> clientAltar = new Dictionary<ulong, ClassAltar>();
 
+    // Keep death subscriptions so we can unsubscribe safely.
+    private readonly Dictionary<ulong, stats> clientStats = new Dictionary<ulong, stats>();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -133,10 +136,22 @@ public class LobbyManager : NetworkBehaviour
 
             if (altar.HasSavedProgress)
             {
-                var st = no.GetComponent<stats>();
-                if (st != null)
-                    altar.ServerApplySavedProgressToStats(st, fillHp: true);
+                var stApply = no.GetComponent<stats>();
+                if (stApply != null)
+                    altar.ServerApplySavedProgressToStats(stApply, fillHp: true);
             }
+        }
+
+        // Track server-side death so we can return the player to their ghost/lobby state.
+        var st = no.GetComponent<stats>();
+        if (st != null)
+        {
+            // Prevent double-subscribe if something spawns weirdly.
+            if (clientStats.TryGetValue(clientId, out var oldSt) && oldSt != null)
+                oldSt.OnDiedServer -= OnCharacterDiedServer;
+
+            clientStats[clientId] = st;
+            st.OnDiedServer += OnCharacterDiedServer;
         }
 
         return true;
@@ -150,6 +165,8 @@ public class LobbyManager : NetworkBehaviour
     private void OnClientDisconnect(ulong clientId)
     {
         if (!IsServer) return;
+
+        UnsubscribeDeath(clientId);
 
         // Save stats into the altar and free the altar if this client spawned from one.
         if (clientCharacter.TryGetValue(clientId, out NetworkObject no) && no != null)
@@ -182,6 +199,114 @@ public class LobbyManager : NetworkBehaviour
 
         clientClass.Remove(clientId);
         clientAltar.Remove(clientId);
+    }
+
+    private void UnsubscribeDeath(ulong clientId)
+    {
+        if (!IsServer) return;
+
+        if (clientStats.TryGetValue(clientId, out var st) && st != null)
+            st.OnDiedServer -= OnCharacterDiedServer;
+
+        clientStats.Remove(clientId);
+    }
+
+    // Called by stats.OnDiedServer on the SERVER for owned characters.
+    private void OnCharacterDiedServer(stats deadStats)
+    {
+        if (!IsServer) return;
+        if (deadStats == null) return;
+
+        var deadNo = deadStats.GetComponent<NetworkObject>();
+        if (deadNo == null) return;
+
+        ulong clientId = deadNo.OwnerClientId;
+
+        // Clean up server bookkeeping so this client can spawn again.
+        HandleCharacterRemovedServer(clientId, died: true);
+    }
+
+    private void HandleCharacterRemovedServer(ulong clientId, bool died)
+    {
+        if (!IsServer) return;
+
+        // Unsubscribe first to avoid any double-calls.
+        UnsubscribeDeath(clientId);
+
+        // Free altar claim if this client spawned from an altar.
+        if (clientAltar.TryGetValue(clientId, out var altar) && altar != null)
+        {
+            // On death: do NOT overwrite saved progress by default.
+            // If you want "save on death", uncomment below.
+            // if (died && clientCharacter.TryGetValue(clientId, out var no) && no != null)
+            // {
+            //     var st = no.GetComponent<stats>();
+            //     if (st != null) altar.ServerSaveProgressFromStats(st);
+            // }
+
+            altar.ServerUnclaim();
+        }
+
+        // Free class (so it can be re-picked) if we know what this client spawned.
+        if (clientClass.TryGetValue(clientId, out ClassType type))
+        {
+            if (enforceUniqueClasses)
+                classTaken[type] = false;
+        }
+
+        clientCharacter.Remove(clientId);
+        clientClass.Remove(clientId);
+        clientAltar.Remove(clientId);
+
+        // Also despawn any leftover camera/listener NetworkObjects owned by this client
+        // (e.g., camera holders spawned as separate NetworkObjects).
+        DespawnOwnedCameraObjects(clientId);
+
+        // Tell the client to re-enable their lobby/ghost camera and allow class selection again.
+        var send = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams { TargetClientIds = new[] { clientId } }
+        };
+        ReturnToLobbyClientRpc(send);
+    }
+
+    [ClientRpc]
+    private void ReturnToLobbyClientRpc(ClientRpcParams rpcParams = default)
+    {
+        if (NetworkManager.Singleton == null) return;
+
+        var localPlayer = NetworkManager.Singleton.LocalClient?.PlayerObject;
+        if (localPlayer == null) return;
+
+        var conn = localPlayer.GetComponent<PlayerConnection>();
+        if (conn != null)
+            conn.ReturnToLobby();
+    }
+
+    private void DespawnOwnedCameraObjects(ulong clientId)
+    {
+        if (!IsServer) return;
+        if (NetworkManager.Singleton == null) return;
+
+        // Some setups spawn a separate NetworkObject that holds the player camera/audio listener
+        // (often parented under the hero at runtime). If the hero despawns, that holder can linger
+        // unless explicitly despawned.
+        foreach (var kvp in NetworkManager.Singleton.SpawnManager.SpawnedObjects)
+        {
+            var no = kvp.Value;
+            if (no == null || !no.IsSpawned) continue;
+            if (no.OwnerClientId != clientId) continue;
+
+            // Do not touch the ghost/netplayer object.
+            if (no.GetComponent<PlayerConnection>() != null) continue;
+
+            // Only despawn objects that actually contain camera/audio components.
+            if (no.GetComponentInChildren<Camera>(true) == null &&
+                no.GetComponentInChildren<AudioListener>(true) == null)
+                continue;
+
+            no.Despawn(true);
+        }
     }
 
     private GameObject GetPrefab(ClassType type)
