@@ -20,9 +20,13 @@ public class PlayerController : NetworkBehaviour
     [Header("Combat Rules")]
     [SerializeField] private bool defaultFriendlyFire = true;
 
-    [Header("Walk Animation Speed")]
-    [SerializeField] private string walkSpeedParam = "WalkSpeedMult";
+    [Header("Locomotion Animation Params")]
+    [SerializeField] private string walkingBoolParam = "walking";
+    [SerializeField] private string backwardBoolParam = "backward";
+    [SerializeField] private string walkSpeedParam = "WalkSpeed";
+
     private const float WALK_SPEED_DIVISOR = 8.0f;
+    private const float MOVE_EPS = 0.001f;
 
     // Archer-specific bow animation logic has been moved into ArcherAttack.
     // Keeping PlayerController class-agnostic makes it easier to create Knight/Mage/Healer.
@@ -212,26 +216,20 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        // Owners drive input + animation params
+        bool facingLeft = FacingLeft.Value;
+
         if (IsOwner)
         {
-            if (animator != null)
-            {
-                bool isWalking = moveInput.sqrMagnitude > 0.0001f;
-                animator.SetBool("walking", isWalking);
-
-                // Always recompute each frame so inspector changes take effect immediately
-                UpdateWalkAnimSpeed(isWalking);
-            }
-
-            HandleRotationOwnerAndSyncFacing();
+            // Owner computes facing from mouse and syncs it
+            facingLeft = HandleRotationOwnerAndSyncFacing();
         }
         else
         {
-            ApplyFacing(FacingLeft.Value);
+            // Remote: apply replicated facing
+            ApplyFacing(facingLeft);
         }
 
-
+        UpdateLocomotionAnimator(facingLeft);
     }
 
     void FixedUpdate()
@@ -248,9 +246,9 @@ public class PlayerController : NetworkBehaviour
 
 
     // Owner computes facing from mouse and syncs to server
-    void HandleRotationOwnerAndSyncFacing()
+    bool HandleRotationOwnerAndSyncFacing()
     {
-        if (_localCamera == null || spriteRenderer == null) return;
+        if (_localCamera == null || spriteRenderer == null) return FacingLeft.Value;
 
         Vector2 mousePos = _localCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         bool facingLeft = mousePos.x < transform.position.x;
@@ -266,7 +264,10 @@ public class PlayerController : NetworkBehaviour
             _lastSentFacingLeft = facingLeft;
             SetFacingLeftServerRpc(facingLeft);
         }
+
+        return facingLeft;
     }
+
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void SetFacingLeftServerRpc(bool facingLeft)
@@ -323,6 +324,45 @@ public class PlayerController : NetworkBehaviour
     {
         FriendlyFire.Value = v;
     }
+
+    private void UpdateLocomotionAnimator(bool facingLeft)
+    {
+        if (animator == null) return;
+
+        // Owner: use input (instant response). Remote: use replicated rigidbody velocity.
+        Vector2 moveVec = Vector2.zero;
+        float speedForAnim = 0f;
+
+        if (IsOwner)
+        {
+            moveVec = moveInput;
+            speedForAnim = moveSpeed; // stats-driven
+        }
+        else
+        {
+            if (rb != null) moveVec = rb.linearVelocity;
+            speedForAnim = moveVec.magnitude; // approximate for remote visuals
+        }
+
+        bool isWalking = moveVec.sqrMagnitude > (MOVE_EPS * MOVE_EPS);
+        animator.SetBool(walkingBoolParam, isWalking);
+
+        // Backward if moving opposite the aim-facing direction on X
+        bool isBackward = false;
+        if (isWalking && Mathf.Abs(moveVec.x) > MOVE_EPS)
+        {
+            // facingLeft => forward is negative X, backward is positive X
+            // facingRight => forward is positive X, backward is negative X
+            isBackward = (facingLeft && moveVec.x > MOVE_EPS) || (!facingLeft && moveVec.x < -MOVE_EPS);
+        }
+
+        animator.SetBool(backwardBoolParam, isBackward);
+
+        // Speed scaling (works with Archer.controller's WalkSpeed param on archerWalk state)
+        float walkMult = isWalking ? (speedForAnim / WALK_SPEED_DIVISOR) : 1f;
+        animator.SetFloat(walkSpeedParam, walkMult);
+    }
+
 
 
 }

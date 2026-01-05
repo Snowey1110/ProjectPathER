@@ -545,6 +545,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
   player: {fileID: 5379443979305331116}
+  detachFromParent: 0
   panSpeed: 200
   panBorderThickness: 10
   panLimit: {x: 10, y: 10}
@@ -809,6 +810,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   defaultFriendlyFire: 1
+  walkingBoolParam: walking
+  backwardBoolParam: backward
   walkSpeedParam: WalkSpeed
   FriendlyFire:
     m_InternalValue: 0
@@ -835,20 +838,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  definition: {fileID: 0}
+  autoResolveDefinition: 1
+  overrideStartLevel: 0
+  overriddenStartLevel: 1
   healthBar: {fileID: 2490360024933785847}
   HP: 10
   defense: 1
   mana: 10
   baseDamage: 1
+  bonusDamage: 0
   level: 0
   abilityPoints: 11
   skillPoints: 2
   moveSpeed: 5
-  abilityPointsPerLevel: 5
+  abilityPointsPerLevelLegacy: 5
   Level:
     m_InternalValue: 1
   Damage:
     m_InternalValue: 1
+  BonusDamage:
+    m_InternalValue: 0
   Defense:
     m_InternalValue: 0
   Mana:
@@ -967,8 +977,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClientNetworkAnimator
   ShowTopMostFoldoutHeaderGroup: 1
-  TransitionStateInfoList: []
-  m_Animator: {fileID: 5161156361555879160}
+  animator: {fileID: 0}
 --- !u!114 &505532009114708831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1055,6 +1064,7 @@ MonoBehaviour:
   bowSpeedMultParam: SpeedMult
   minSpeedMult: 0.05
   maxSpeedMult: 20
+  enablePercentHpBonus: 1
 --- !u!114 &1238352054297935531
 MonoBehaviour:
   m_ObjectHideFlags: 0
